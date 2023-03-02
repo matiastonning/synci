@@ -176,9 +176,9 @@ export default {
                     class: 'hover:bg-red-700 bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
                 } : {
                     text: 'Add Budget',
-                    class: 'hover:bg-indigo-700 bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'
+                    class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2'
                 }"
-                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60' : 'bg-indigo-700 bg-opacity-70 text-white'"
+                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60' : 'bg-teal-800 bg-opacity-70 text-white'"
                 :title-class="selectedItemId ? 'text-gray-900' : 'text-white'"
                 :subtitle-class="selectedItemId ? 'text-gray-500' : 'text-white opacity-70'"
                 :x-button-class="selectedItemId ? 'text-gray-400 hover:text-gray-500' : 'text-white hover:text-gray-100'"

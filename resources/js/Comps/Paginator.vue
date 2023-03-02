@@ -54,7 +54,7 @@ export default {
                        v-show="!link.label.includes('Next') && !link.label.includes('Previous')  && !link.label.includes('...')"
                        class="hidden sm:block relative items-center py-2 px-4 text-sm font-medium rounded-md"
                        :class="{
-                                    'z-10 bg-indigo-50  text-indigo-600': link.active, // active
+                                    'z-10 bg-teal-500 bg-opacity-10 text-teal-600': link.active, // active
                                     'text-gray-500 hover:bg-gray-50': !link.active, // default
                                     'hidden md:inline-flex': (links[index-1] && links[index-1].label.includes('...')) || (links[index+1] && links[index+1].label.includes('...')), // one before or after middle item
                                     'inline-flex text-gray-700': link.label.includes('...'), // middle item

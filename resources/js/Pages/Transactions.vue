@@ -83,7 +83,7 @@ export default {
                 transactionClass = 'bg-gray-100 text-gray-800';
             } else if(transaction.status === this.transactionStatuses['TRANSFERRED']) {
                 transactionStatus = 'Transferred';
-                transactionClass = 'bg-green-100 text-green-800';
+                transactionClass = 'bg-teal-100 text-teal-800';
             } else if(transaction.status === this.transactionStatuses['TRANSFERRING']) {
                 transactionStatus = 'Transferring';
                 transactionClass = 'bg-indigo-100 text-indigo-800';
@@ -160,7 +160,7 @@ export default {
             </div>
         </div>
         <Slider title="Transaction" subtitle="Transaction details"
-                :action-button="{ text: 'Retry', class: 'hover:bg-indigo-700 bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2' }"
+                :action-button="{ text: 'Retry', class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2' }"
                 :open="sliderOpen" :selected-id="selectedItem.ID"
                 @close-slider="sliderClosed" @action-clicked="(e) => sliderActionClicked(e)">
 

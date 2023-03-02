@@ -42,14 +42,14 @@ export default {
                                 <CheckCircleIcon v-if="type==='success'" class="h-6 w-6 text-green-400" aria-hidden="true" />
                                 <ExclamationTriangleIcon v-else-if="type==='error'" class="h-6 w-6 text-red-400" aria-hidden="true" />
                                 <ExclamationCircleIcon v-else-if="type==='warning'" class="h-6 w-6 text-orange-400" aria-hidden="true" />
-                                <InformationCircleIcon v-else-if="type==='info'" class="h-6 w-6 text-indigo-400" aria-hidden="true" />
+                                <InformationCircleIcon v-else-if="type==='info'" class="h-6 w-6 text-teal-400" aria-hidden="true" />
                             </div>
                             <div class="ml-3 w-0 flex-1 pt-0.5">
                                 <p class="text-sm font-medium text-gray-900">{{ title }}</p>
                                 <p class="mt-1 text-sm text-gray-500">{{ message }}</p>
                             </div>
                             <div class="ml-4 flex flex-shrink-0">
-                                <button type="button" @click="this.$emit('closeNotification')" class="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                                <button type="button" @click="this.$emit('closeNotification')" class="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2">
                                     <span class="sr-only">Close</span>
                                     <XMarkIcon class="h-5 w-5" aria-hidden="true" />
                                 </button>

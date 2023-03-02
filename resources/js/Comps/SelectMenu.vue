@@ -29,7 +29,7 @@ export default {
     <Listbox as="div" v-model="selected">
         <ListboxLabel class="block text-sm font-medium text-gray-700">{{ label }}</ListboxLabel>
         <div class="relative mt-1">
-            <ListboxButton class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+            <ListboxButton class="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500 sm:text-sm">
         <span class="flex items-center">
           <img :src="selected.icon" alt="" class="h-6 w-6 flex-shrink-0 rounded-full" />
           <span class="ml-3 block truncate">{{ selected.name }}</span>
@@ -48,7 +48,7 @@ export default {
                                 <span :class="[selected ? 'font-semibold' : 'font-normal', 'ml-3 block truncate']">{{ item.name }}</span>
                             </div>
 
-                            <span v-if="selected" :class="['text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4']">
+                            <span v-if="selected" :class="['text-teal-600 absolute inset-y-0 right-0 flex items-center pr-4']">
                 <CheckIcon class="h-5 w-5" aria-hidden="true" />
               </span>
                         </li>

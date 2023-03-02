@@ -57,7 +57,7 @@ export default {
                                     <span v-html="item.value"></span>
                                 </td>
                                 <td :class="[rowIndex !== rows.length - 1 ? 'border-b border-gray-200' : '', 'relative whitespace-nowrap rounded-tr-lg py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-8 lg:pr-8']">
-                                    <button is="link" @click="this.$emit('actionClicked', row)" class="text-indigo-600 hover:text-indigo-900">{{ row.action.text }}</button>
+                                    <button is="link" @click="this.$emit('actionClicked', row)" class="text-teal-600 hover:text-teal-900">{{ row.action.text }}</button>
                                 </td>
                             </tr>
                         </tbody>

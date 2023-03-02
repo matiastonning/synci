@@ -26,7 +26,7 @@ export default {
         <RadioGroupLabel class="sr-only"> Server size </RadioGroupLabel>
         <div class="space-y-4">
             <RadioGroupOption as="template" v-for="item in items" :key="item.id" :value="item" v-slot="{ checked, active }" @click="this.$emit('stackedCardSelected', selected);">
-                <div :class="[checked ? 'border-transparent' : 'border-gray-300', active ? 'border-indigo-500 ring-2 ring-indigo-500' : '', 'relative block cursor-pointer rounded-lg border bg-white px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between']">
+                <div :class="[checked ? 'border-transparent' : 'border-gray-300', active ? 'border-teal-500 ring-2 ring-teal-500' : '', 'relative block cursor-pointer rounded-lg border bg-white px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between']">
                       <span class="flex items-center">
                         <span class="flex min-w-0 flex-1 items-center text-sm">
                             <div class="flex-shrink-0">
@@ -40,7 +40,7 @@ export default {
                             </div>
                         </span>
                       </span>
-                    <span :class="[active ? 'border' : 'border-2', checked ? 'border-indigo-500' : 'border-transparent', 'pointer-events-none absolute -inset-px rounded-lg']" aria-hidden="true" />
+                    <span :class="[active ? 'border' : 'border-2', checked ? 'border-teal-500' : 'border-transparent', 'pointer-events-none absolute -inset-px rounded-lg']" aria-hidden="true" />
                 </div>
             </RadioGroupOption>
         </div>

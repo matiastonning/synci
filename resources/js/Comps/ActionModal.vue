@@ -60,8 +60,8 @@ export default {
                         <DialogPanel class="relative transform overflow-hidden rounded-lg bg-opacity-90 bg-white backdrop-blur text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                             <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <div class="sm:flex sm:items-start">
-                                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-indigo-100 sm:mx-0 sm:h-10 sm:w-10">
-                                        <BookOpenIcon class="h-6 w-6 text-indigo-600" aria-hidden="true" />
+                                    <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-teal-100 sm:mx-0 sm:h-10 sm:w-10">
+                                        <BookOpenIcon class="h-6 w-6 text-teal-600" aria-hidden="true" />
                                     </div>
                                     <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left min-h-[550px]">
                                         <DialogTitle as="h3" class="text-lg font-medium leading-6 text-gray-900">{{ title }}</DialogTitle>
@@ -71,7 +71,7 @@ export default {
                                             <hr class="mt-8">
 
                                             <label for="transfer_start_date" class="block text-sm font-medium text-gray-700 mt-8">Transfer Start Date</label>
-                                            <vue-tailwind-datepicker :formatter="formatter" id="transfer_start_date" as-single v-model="dateValue" @update:modelValue="startDate = dateValue[0]" inputClasses="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                                            <vue-tailwind-datepicker :formatter="formatter" id="transfer_start_date" as-single v-model="dateValue" @update:modelValue="startDate = dateValue[0]" inputClasses="block w-full mt-1 rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm" />
                                             <p class="mt-2 text-xs text-gray-500">Transactions with a booking date earlier than the transfer start date will not be transferred.</p>
 
                                             <hr class="mt-8">
@@ -88,8 +88,8 @@ export default {
                                 </div>
                             </div>
                             <div class="bg-gray-200 bg-opacity-30 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                <button type="button" :disabled="budgetItems.length > 0 && !dateValue.length > 0" class="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50" @click="confirm">{{ action }}</button>
-                                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="close" ref="cancelButtonRef">Cancel</button>
+                                <button type="button" :disabled="budgetItems.length > 0 && !dateValue.length > 0" class="inline-flex w-full justify-center rounded-md border border-transparent bg-teal-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50" @click="confirm">{{ action }}</button>
+                                <button type="button" class="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm" @click="close" ref="cancelButtonRef">Cancel</button>
                             </div>
                         </DialogPanel>
                     </TransitionChild>

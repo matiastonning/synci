@@ -20,7 +20,7 @@ module.exports = {
                 sans: ['Inter var', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-                "vtd-primary": colors.indigo, // Light mode Datepicker color
+                "vtd-primary": colors.teal, // Light mode Datepicker color
                 "vtd-secondary": colors.gray, // Dark mode Datepicker color
             },
         },

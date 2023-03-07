@@ -30,7 +30,7 @@ class FetchTransactions implements ShouldQueue, ShouldBeUnique
 
     public int $tries = 1;
     public int $maxExceptions = 2;
-    public int $timeout = 10;
+    public int $timeout = 20;
     public bool $failOnTimeout = true;
 
     /**

@@ -22,10 +22,6 @@ export default {
         },
         items: {
             type: Array
-        },
-        activeBudgets: {
-            type: Object,
-            default: []
         }
     },
     methods: {
@@ -55,7 +51,7 @@ export default {
                     <div class="flex items-center px-4 py-4 sm:px-6">
                         <div class="flex min-w-0 flex-1 items-center">
                             <div class="flex-shrink-0">
-                                <BuildingLibraryIcon class="h-12 w-12 bg-orange-100 p-2.5 text-orange-400 rounded-full object-cover" aria-hidden="true" />
+                                <BuildingLibraryIcon v-if="item.type==='Bank Account'" class="h-12 w-12 bg-orange-100 p-2.5 text-orange-400 rounded-full object-cover" aria-hidden="true" />
                             </div>
                             <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                                 <div>
@@ -64,7 +60,7 @@ export default {
                                     </div>
                                     <p class="mt-2 flex items-center text-sm text-gray-500">
                                         <CircleStackIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <span class="truncate">{{ item.name + ' (' + item.account + ')' }}</span>
+                                        <span class="truncate">{{ item.displayName }}</span>
                                     </p>
                                 </div>
                                 <div class="hidden md:block">
@@ -76,11 +72,10 @@ export default {
                                                 <time :datetime="item.last_synced">{{ moment(item.last_synced).fromNow() }}</time>
                                             </p>
                                             <p class="mt-2 flex items-center text-sm text-gray-500">
-                                                <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-green-400" aria-hidden="true" />
+                                                <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-teal-400" aria-hidden="true" />
                                                 Connected to {{ item.destination_type + ' (' + item.destination_name + ')' }}
                                             </p>
                                         </div>
-
                                         <div v-else class="flex mt-1 items-center">
                                             <button @click.stop="this.$emit('actionButtonClicked', item)" class="flex w-24 items-center justify-center rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Activate</button>
                                         </div>

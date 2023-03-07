@@ -8,6 +8,7 @@ use App\Models\ApiCredential;
 use App\Models\Source;
 use App\Models\Transaction;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +16,7 @@ use Illuminate\Support\Str;
 
 class TinkController extends Controller
 {
-    public function createUser($userId, $countryCode): \Illuminate\Http\JsonResponse
+    public function createUser($userId, $countryCode): JsonResponse
     {
         if(ApiCredential::where('user_id', $userId)->where('source_type', SourceType::Tink)->exists()) {
             return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'API credentials already exist for this source.'], 204);
@@ -38,11 +39,16 @@ class TinkController extends Controller
             $accessToken = $response->json()['access_token'];
 
 
+            // create a new API credential
+            $apiCredential = new ApiCredential();
+            $apiCredential->user_id = $userId;
+            $apiCredential->type = ApiCredentialType::OAuth;
+            $apiCredential->source_type = SourceType::Tink;
 
             // create a new user
             $response = Http::withToken($accessToken)
                 ->post('https://api.tink.com/api/v1/user/create', [
-                    'external_user_id' => 'test12:'.$userId,
+                    'external_user_id' => 'uid:'.$userId . ', aid:' . $apiCredential->id,
                     'market' => $countryCode,
                     'locale' => 'en_US',
                 ]);
@@ -55,47 +61,31 @@ class TinkController extends Controller
             // get the Tink user ID
             $tinkUserId = $response->json()['user_id'];
 
-            // create a new API credential with the Tink user ID
-            $apiCredential = new ApiCredential();
-            $apiCredential->user_id = $userId;
-            $apiCredential->type = ApiCredentialType::OAuth;
-            $apiCredential->source_type = SourceType::Tink;
-            $apiCredential->identifier = Crypt::encryptString($tinkUserId);
+            // set API credential identifier to Tink user ID
+            $apiCredential->identifier = $tinkUserId;
             $apiCredential->save();
         }
         return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'API credentials and Tink user created.'], 201);
     }
 
-    public function getOauthUrl($user, $countryCode): \Illuminate\Http\JsonResponse
+    public function getOauthUrl($user, $countryCode): JsonResponse
     {
         // authorize app with authorization:grant scope
-        $response = Http::asForm()
-            ->post('https://api.tink.com/api/v1/oauth/token', [
-                'client_id' => env('TINK_CLIENT_ID'),
-                'client_secret' => env('TINK_CLIENT_SECRET'),
-                'grant_type' => 'client_credentials',
-                'scope' => 'authorization:grant',
-            ]);
-
-        if ($response->failed()) {
+        $response = $this->generateClientAuthCode('client_credentials', 'authorization:grant')->getData();
+        if ($response->status == 'error') {
             Log::error('Unable to authorize application.', ['response' => $response]);
-            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to authorize application.'], 401);
-
+            return $response;
         }
-
-        // get the access token
-        $accessToken2 = $response->json()['access_token'];
+        $clientAccessToken = $response->access_token;
 
         // get API credentials for Tink, set token3 to the access token
         $apiCredential = ApiCredential::where('user_id', $user->id)->where('source_type', SourceType::Tink)->first();
-        $apiCredential->token3 = Crypt::encryptString($accessToken2);
-        $apiCredential->save();
 
         // grant user access
-        $response = Http::asForm()->withToken($accessToken2)
+        $response = Http::asForm()->withToken($clientAccessToken)
             ->post('https://api.tink.com/api/v1/oauth/authorization-grant/delegate', [
                 'actor_client_id' => 'df05e4b379934cd09963197cc855bfe9',
-                'user_id' => Crypt::decryptString($apiCredential->identifier),
+                'user_id' => $apiCredential->identifier,
                 'id_hint' => $user->email,
                 'scope' => 'authorization:read,authorization:grant,credentials:refresh,credentials:read,credentials:write,providers:read,user:read',
             ]);
@@ -113,13 +103,58 @@ class TinkController extends Controller
         return response()->json(['status' => 'success','statusTitle' => 'Success',  'statusMessage' => $url], 200);
     }
 
-    public function getAccessToken($user, $apiCredential): \Illuminate\Http\JsonResponse
+    private function generateClientAuthCode($grantType, $scope): JsonResponse {
+        $response = Http::asForm()
+            ->post('https://api.tink.com/api/v1/oauth/token', [
+                'client_id' => env('TINK_CLIENT_ID'),
+                'client_secret' => env('TINK_CLIENT_SECRET'),
+                'grant_type' => $grantType,
+                'scope' => $scope,
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Unable to authorize application.', ['response' => $response]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to authorize application.'], 401);
+
+        }
+
+        // return the access token
+        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'access_token' => $response->json()['access_token']], 200);
+    }
+
+    /**
+     * Get the access token for the user.
+     * Requires client auth code with scope: authorization:grant.
+     * @param $user
+     * @param $apiCredential
+     * @return JsonResponse
+     */
+    public function getAccessToken($user, $apiCredential): JsonResponse
     {
+        // check if ApiCredential has expired, return access token if not
+        $expiryDate = Carbon::parse($apiCredential->expires_at);
+        if (!$expiryDate->isPast()) {
+            // get the access token from the ApiCredential
+            $accessToken = $apiCredential->token;
+            Log::info('ApiCredential is not expired.');
+            return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
+        } else {
+            Log::info('ApiCredential is expired, getting new.');
+        }
+
+        // generate new auth code with scope: authorization:grant
+        $response = $this->generateClientAuthCode('client_credentials', 'authorization:grant')->getData();
+        if ($response->status == 'error') {
+            Log::error('Unable to authorize application.', ['response' => $response]);
+            return $response;
+        }
+        $clientAccessToken = $response->access_token;
+
         // get user auth code
-        $response = Http::asForm()->withToken(Crypt::decryptString($apiCredential->token3))
+        $response = Http::asForm()->withToken($clientAccessToken)
             ->post('https://api.tink.com/api/v1/oauth/authorization-grant/delegate', [
                 'actor_client_id' => env('TINK_CLIENT_ID'),
-                'user_id' => Crypt::decryptString($apiCredential->identifier),
+                'user_id' => $apiCredential->identifier,
                 'id_hint' => $user->email,
                 'scope' => 'accounts:read,balances:read,transactions:read,provider-consents:read,credentials:refresh',
             ]);
@@ -147,23 +182,21 @@ class TinkController extends Controller
 
         // get the access & refresh tokens, and expiry time
         $accessToken = $response->json()['access_token'];
-        $refreshToken = $response->json()['refresh_token'] ?? '';
         $expiresIn = $response->json()['expires_in'];
 
         // set the access & refresh tokens, and expiry time in the API credential
         $apiCredential->token1 = Crypt::encryptString($accessToken);
-        $apiCredential->token2 = Crypt::encryptString($refreshToken);
         $apiCredential->expires_at = Carbon::now()->addSeconds($expiresIn);
         $apiCredential->active = true;
         $apiCredential->save();
 
-        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => $accessToken], 200);
+        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
     }
 
-    public function fetchAccounts($userId, $accessToken): \Illuminate\Http\JsonResponse
+    public function fetchAccounts($userId, $apiCredential): JsonResponse
     {
         // get accounts with access token
-        $response = Http::withToken($accessToken)
+        $response = Http::withToken(Crypt::decryptString($apiCredential->token1))
             ->get('https://api.tink.com/data/v2/accounts');
 
         if ($response->failed()) {
@@ -176,7 +209,7 @@ class TinkController extends Controller
         // loop through accounts, create sources if they don't exist
         foreach ($accounts as $account) {
             // check if source exists
-            $source = Source::where('user_id', $userId)->where('type', SourceType::Tink)->where('external_id', $account['id'])->first();
+            $source = Source::where('user_id', $userId)->where('type', SourceType::Tink)->where('identifier', $account['identifiers']['iban']['bban'])->first();
             if($source == null) {
                 // create source
                 $source = new Source();
@@ -200,14 +233,18 @@ class TinkController extends Controller
         return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Accounts fetched.'], 200);
     }
 
-    public function fetchTransactions($userId, $source, $startDate): \Illuminate\Http\JsonResponse
+    private function loopTransactionPages($userId, $source, $startDate, $nextPageToken) {
+
+    }
+
+    public function fetchTransactions($userId, $source, $startDate, $nextPageToken = null): JsonResponse
     {
         // check if source is active
         if(!$source->active) {
             return response()->json([
                 'statusTitle' => 'Error',
                 'statusMessage' => 'The source has not been activated.',
-                'status' => 'error'
+                'status' => 'error',
             ]);
         }
 
@@ -222,7 +259,9 @@ class TinkController extends Controller
             ->get('https://api.tink.com/data/v2/transactions',[
                 'accountIdIn' => $source->external_id,
                 'bookedDateGte' => $startDate,
-                'statusIn' => 'BOOKED'
+                'statusIn' => 'BOOKED',
+                'pageToken' => $nextPageToken
+
             ]);
 
         if ($response->failed()) {
@@ -234,7 +273,9 @@ class TinkController extends Controller
             ]);
         }
 
-        $transactions = $response->json()['transactions'];
+        $transactionsObj = $response->json();
+        $transactions = $transactionsObj['transactions'];
+
 
         foreach ($transactions as $transaction) {
             // add transaction to database
@@ -262,6 +303,16 @@ class TinkController extends Controller
                 'booking_date' => $transaction['dates']['booked'],
 
                 'uuid' => Str::uuid(),
+            ]);
+        }
+
+        if(isset($transactionsObj['nextPageToken']) && $transactionsObj['nextPageToken'] != "") {
+            // get booked transactions from start date to today, with next page token
+            $this->fetchTransactions($userId, $source, $startDate, $transactionsObj['nextPageToken']);
+            return response()->json([
+                'statusTitle' => 'Getting next page',
+                'statusMessage' => 'Transactions fetched, getting next page.',
+                'status' => 'info'
             ]);
         }
 

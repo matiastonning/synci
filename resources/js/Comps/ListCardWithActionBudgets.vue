@@ -67,7 +67,7 @@ export default {
                                             <time :datetime="item.created_at">{{ moment(item.created_at).fromNow() }}</time>
                                         </p>
                                         <p class="mt-2 flex items-center text-sm text-gray-500">
-                                            <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-green-400" aria-hidden="true" />
+                                            <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-teal-400" aria-hidden="true" />
                                             {{ item.active ? 'Connected' : 'Disconnected' }}
                                         </p>
                                     </div>
@@ -85,13 +85,4 @@ export default {
             </div>
         </ul>
     </div>
-    <AddEditBudget
-        :title="editMode ? 'Edit Budget' : 'Add Budget'"
-        :subtitle="editMode ? 'Manage budget connection.' : 'Add a new budgeting app to your Synci.io account.'"
-        :edit="editMode"
-        :open="sliderOpen"
-        :selected-item="selectedItem"
-        :budget-types="$page['props']['budget_types']"
-        @close-slider="sliderOpen = false"
-    />
 </template>

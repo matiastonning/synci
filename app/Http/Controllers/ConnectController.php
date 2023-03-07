@@ -128,7 +128,7 @@ class ConnectController extends Controller
     }
 
 
-    public function connectSourceCallback(Request $request, $sourceType)
+    public function connectSourceCallback(Request $request, $sourceType): \Illuminate\Http\RedirectResponse
     {
         if($sourceType == SourceType::Tink) {
             // check if Tink returned an error
@@ -137,8 +137,8 @@ class ConnectController extends Controller
                     return redirect()->route('connect.sources')->with([
                         'message' => [
                             'statusTitle' => 'Cancelled',
-                            'statusMessage' => 'Connection cancelled by user.',
-                            'status' => 'error'
+                            'statusMessage' => 'Authentication cancelled by user.',
+                            'status' => 'warning'
                         ]
                     ]);
                 }
@@ -158,7 +158,7 @@ class ConnectController extends Controller
 
             $credentialsId = $request->query('credentialsId');
             $apiCredential = ApiCredential::where('user_id', $request->user()->id)->where('source_type', SourceType::Tink)->first();
-            $apiCredential->identifier2 = Crypt::encryptString($credentialsId);
+            $apiCredential->identifier2 = $credentialsId;
             $apiCredential->save();
 
             // get access token
@@ -176,10 +176,9 @@ class ConnectController extends Controller
                 ]);
             }
 
-            $accessToken = $response->original['statusMessage'];
 
             // get accounts with access token
-            $response = $tink->fetchAccounts($request->user()->id, $accessToken);
+            $response = $tink->fetchAccounts($request->user()->id, $apiCredential);
 
             // handle error
             if($response->original['status'] == 'error') {

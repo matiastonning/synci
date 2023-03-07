@@ -7,6 +7,12 @@ import DescriptionList from "../Comps/DescriptionList.vue";
 import StackedCards from "../Comps/StackedCards.vue";
 import ActionModal from "../Comps/ActionModal.vue";
 import SelectMenu from "../Comps/SelectMenu.vue";
+import {BuildingLibraryIcon} from "@heroicons/vue/24/outline";
+
+const providers = [
+    { id: 0,title: 'Bank Account', subtitle: 'Connect a bank account', customIcon: true, icon: BuildingLibraryIcon, extra: 'https://www.tink.com/' },
+];
+
 </script>
 
 <script>
@@ -34,9 +40,6 @@ export default {
             activateModalOpen: false,
             sourceTypes: this.$page['props']['source_types'],
             country: this.$page.props.countries[0].key,
-            providers: [
-                { id: 0,title: 'Bank Account', subtitle: 'Connect to your bank with Tink', icon: '../assets/icons/tink.png', extra: 'https://www.tink.com/' },
-            ],
         }
     },
     methods: {
@@ -172,7 +175,7 @@ export default {
                 this.selectedItem = {
                     'Status': item.active ? 'Active' : 'Inactive',
                     'Type': item.type,
-                    'Provider': item.provider,
+                    'Integrator': item.integrator,
                     'Account Name': item.name,
                     'Account Number': item.account,
                     'Last Sync': moment(item.last_synced).format('MMMM Do YYYY, HH:mm:ss (UTC)'),
@@ -215,8 +218,10 @@ export default {
                 this.sourceItems.push({
                     id: source.id,
                     type: 'Bank Account',
-                    provider: 'Aiia',
-                    name: source.name + ' (' + source.identifier + ')',
+                    integrator: 'Aiia',
+                    displayName: source.name + ' (' + source.identifier + ')',
+                    name: source.name,
+                    account: source.identifier,
                     icon: '../assets/icons/curve.png',
                     iconAlt: 'Aiia icon',
                     created_at: source.created_at,
@@ -229,7 +234,8 @@ export default {
                 this.sourceItems.push({
                     id: source.id,
                     type: 'Bank Account',
-                    provider: 'Tink',
+                    integrator: 'Tink',
+                    displayName: source.name + ' (' + source.identifier + ')',
                     name: source.name,
                     account: source.identifier,
                     icon: '../assets/icons/tink.png',
@@ -262,7 +268,6 @@ export default {
                     <ListCardWithActionSources
                         title="Connected Sources"
                         action="Add Source"
-                        :active-budgets="activeBudgets"
                         @action-clicked="(item) => tableActionClicked(item)"
                         @action-button-clicked="(item) => tableActionButtonClicked(item)"
                         :items="sourceItems"
@@ -272,7 +277,7 @@ export default {
         </div>
 
         <Slider :title="selectedItemId ? 'Edit Source' : 'Add Source'"
-                :subtitle="selectedItemId ? 'Manage source connection.' : 'Add a new source to your Synci.io account.'"
+                :subtitle="selectedItemId ? 'Manage source connection.' : 'Connect the sources you want to integrate with Synci to get started. We have partnered with Tink to simplify this process for bank accounts.'"
                 :action-button="selectedItemId ? {
                     text: 'Delete Source',
                     class: 'hover:bg-red-700 bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
@@ -293,7 +298,8 @@ export default {
                              @open-activate-source-modal="openActivateSourceModal"
                              @deactivate-source="(sourceId) => alterSource(sourceId)" />
             <div v-else>
-                <SelectMenu @selected-changed="(selectedCountry) => country = selectedCountry" :items="$page['props']['countries']" label="Country" class="mb-10" />
+                <SelectMenu @selected-changed="(selectedCountry) => country = selectedCountry" :items="$page['props']['countries']" label="Country" class="mb-6" />
+                <hr class="mb-6" />
                 <StackedCards :items="providers" @stacked-card-selected="" />
             </div>
         </Slider>

@@ -23,14 +23,15 @@ export default {
 
 <template>
     <RadioGroup v-model="selected">
-        <RadioGroupLabel class="sr-only"> Server size </RadioGroupLabel>
+        <RadioGroupLabel class="sr-only">Select item</RadioGroupLabel>
         <div class="space-y-4">
             <RadioGroupOption as="template" v-for="item in items" :key="item.id" :value="item" v-slot="{ checked, active }" @click="this.$emit('stackedCardSelected', selected);">
                 <div :class="[checked ? 'border-transparent' : 'border-gray-300', active ? 'border-teal-500 ring-2 ring-teal-500' : '', 'relative block cursor-pointer rounded-lg border bg-white px-6 py-4 shadow-sm focus:outline-none sm:flex sm:justify-between']">
                       <span class="flex items-center">
                         <span class="flex min-w-0 flex-1 items-center text-sm">
                             <div class="flex-shrink-0">
-                                <img class="h-9 w-9 rounded-full" :src="item.icon"  />
+                                <component v-if="item.customIcon" :is="item.icon" class="h-10 w-10 p-2 bg-orange-100 text-orange-400 rounded-full" aria-hidden="true" />
+                                <img v-else class="h-9 w-9 rounded-full" :src="item.icon"  />
                             </div>
                             <div class="min-w-0 flex-1 px-4 grid">
                               <RadioGroupLabel as="span" class="font-medium text-gray-900">{{ item.title }}</RadioGroupLabel>

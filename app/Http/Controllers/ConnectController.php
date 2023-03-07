@@ -196,7 +196,7 @@ class ConnectController extends Controller
             return redirect()->route('connect.sources')->with([
                 'message' => [
                     'statusTitle' => 'Connected',
-                    'statusMessage' => 'Your bank has been connected successfully. Remember to activate the accounts you want to use.',
+                    'statusMessage' => 'Your bank has been connected successfully. Activate your accounts to start fetching transactions.',
                     'status' => 'success'
                 ]
             ]);

@@ -7,6 +7,7 @@ use App\Enums\SourceType;
 use App\Models\ApiCredential;
 use App\Models\Source;
 use App\Models\Transaction;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Crypt;
@@ -135,7 +136,7 @@ class TinkController extends Controller
         $expiryDate = Carbon::parse($apiCredential->expires_at);
         if (!$expiryDate->isPast()) {
             // get the access token from the ApiCredential
-            $accessToken = $apiCredential->token;
+            $accessToken = $apiCredential->token1;
             Log::info('ApiCredential is not expired.');
             return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
         } else {
@@ -193,11 +194,24 @@ class TinkController extends Controller
         return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
     }
 
-    public function fetchAccounts($userId, $apiCredential): JsonResponse
+    public function fetchAccounts($userId, $apiCredential, $source = null): JsonResponse
     {
+        $user = User::findOrFail($userId);
+
+        // get access token
+        $accessToken = Crypt::decryptString($this->getAccessToken($user, $apiCredential)->getData()->accessToken);
+
         // get accounts with access token
-        $response = Http::withToken(Crypt::decryptString($apiCredential->token1))
-            ->get('https://api.tink.com/data/v2/accounts');
+        if($source) {
+            $response = Http::withToken($accessToken)
+                ->get('https://api.tink.com/data/v2/accounts', [
+                    'idIn' => $source->external_id,
+                ]);
+        } else {
+            $response = Http::withToken($accessToken)
+                ->get('https://api.tink.com/data/v2/accounts');
+        }
+
 
         if ($response->failed()) {
             Log::error('Unable to get bank accounts.', ['response' => $response]);
@@ -233,10 +247,6 @@ class TinkController extends Controller
         return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Accounts fetched.'], 200);
     }
 
-    private function loopTransactionPages($userId, $source, $startDate, $nextPageToken) {
-
-    }
-
     public function fetchTransactions($userId, $source, $startDate, $nextPageToken = null): JsonResponse
     {
         // check if source is active
@@ -248,15 +258,17 @@ class TinkController extends Controller
             ]);
         }
 
+        $apiCredential = $source->user->apiCredentials()->where('active', true)->where('source_type', $source->type)->first();
+
+        // get access token
+        $accessToken = Crypt::decryptString($this->getAccessToken(User::findOrFail($userId), $apiCredential)->getData()->accessToken);
+
         // use Carbon to format start date as YYYY-MM-DD
         $startDate = Carbon::parse($startDate)->format('Y-m-d');
 
-        // get access token
-        $accessToken = Crypt::decryptString(ApiCredential::where('user_id', $userId)->where('source_type', SourceType::Tink)->first()->token1);
-
         // get booked transactions from start date to today
         $response = Http::withToken($accessToken)
-            ->get('https://api.tink.com/data/v2/transactions',[
+            ->get('https://api.tink.com/data/v2/transactions', [
                 'accountIdIn' => $source->external_id,
                 'bookedDateGte' => $startDate,
                 'statusIn' => 'BOOKED',

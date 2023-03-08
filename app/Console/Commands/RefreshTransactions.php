@@ -35,6 +35,7 @@ class RefreshTransactions extends Command
      */
     public function handle()
     {
+        //TODO: Make this a scheduled job
         $tink = new TinkController();
 
         $logMessage = 'Refreshing transactions.';

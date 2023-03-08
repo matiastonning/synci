@@ -20,11 +20,10 @@ class TransactionsController extends Controller
         $search = $request->query('search');
         $source = $request->query('source');
 
-        // Check for search input
-        if ($search) {
-            $transactions = Transaction::where('user_id', $user->id)
-                ->with('source:id,name,identifier')
-                ->where(function($query) use ($search) {
+        $transactions = Transaction::where('user_id', $user->id)
+            ->with('source:id,name,identifier')
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($query) use ($search) {
                     $query->where('description_long', 'LIKE', '%'.$search.'%')
                         ->orWhere('category', 'LIKE', '%'.$search.'%')
                         ->orWhere('reference', 'LIKE', '%'.$search.'%')
@@ -32,19 +31,13 @@ class TransactionsController extends Controller
                         ->orWhere('amount', 'LIKE', '%'.$search.'%')
                         ->orWhereRelation('source', 'name', 'LIKE', '%' . $search . '%')
                         ->orWhereRelation('source', 'identifier', 'LIKE', '%' . $search . '%');
-                    })
-                ->when($source, function ($query, $source) {
-                    return $query->whereRelation('source', 'name', $source);
-                })
-                ->orderBy('booking_date', 'desc');
-        } else {
-            $transactions = Transaction::where('user_id', $user->id)
-                ->with('source:id,name,identifier')
-                ->when($source, function ($query, $source) {
-                    return $query->whereRelation('source', 'name', $source);
-                })
-                ->orderBy('booking_date', 'desc');
-        }
+                });
+            })
+            ->when($source, function ($query, $source) {
+                return $query->whereRelation('source', 'name', $source);
+            })
+            ->orderBy('booking_date', 'desc');
+
 
         return Inertia::render('Transactions', [
             'transactions' => $transactions->paginate(50)->onEachSide(1)->withQueryString(),

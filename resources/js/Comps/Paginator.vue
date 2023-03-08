@@ -45,24 +45,24 @@ export default {
             </p>
 
             <div>
-                <nav class="isolate inline-flex space-x-2 -space-x-px rounded-md" aria-label="Pagination">
-                    <Link :class="!links[0].url ? 'pointer-events-none opacity-50' : null" preserveScroll :href="links[0].url ? links[0].url : ''" class="relative rounded-md inline-flex items-center rounded-l-md px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20">
+                <nav class="isolate inline-flex space-x-1 -space-x-px rounded-md" aria-label="Pagination">
+                    <Link :class="!links[0].url ? 'pointer-events-none opacity-50' : null" preserveScroll :href="links[0].url ? links[0].url : ''" class="relative rounded-md inline-flex lg:hidden xl:inline-flex items-center rounded-l-md px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20">
                         <span class="sr-only">Previous</span>
                         <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
                     </Link>
                     <Link v-for="(link, index) in links" :href="link.url === null ? '#' : link.url" preserveScroll
-                       v-show="!link.label.includes('Next') && !link.label.includes('Previous')  && !link.label.includes('...')"
-                       class="hidden sm:block relative items-center py-2 px-4 text-sm font-medium rounded-md"
+                       v-show="!link.label.includes('Next') && !link.label.includes('Previous')"
+                       class="hidden lg:block relative items-center py-2 px-3.5 text-sm font-medium rounded-md"
                        :class="{
                                     'z-10 bg-teal-500 bg-opacity-10 text-teal-600': link.active, // active
                                     'text-gray-500 hover:bg-gray-50': !link.active, // default
-                                    'hidden md:inline-flex': (links[index-1] && links[index-1].label.includes('...')) || (links[index+1] && links[index+1].label.includes('...')), // one before or after middle item
-                                    'inline-flex text-gray-700': link.label.includes('...'), // middle item
-                                    'focus:z-20': !link.label.includes('...'), // not middle item
+                                    'hidden lg:inline-flex': (links[index-1] && links[index-1].label.includes('...')) || (links[index+1] && links[index+1].label.includes('...')), // one before or after middle item
+                                    'inline-flex text-gray-700 pointer-events-none opacity-50': link.label.includes('...'), // ...
+                                    'focus:z-20': !link.label.includes('...'), // not ...
                                 }"
                     >{{ link.label }}</Link>
 
-                    <Link :class="!links[links.length - 1].url ? 'pointer-events-none opacity-50' : null" preserveScroll :href="links[links.length - 1].url ? links[links.length - 1].url : ''" class="relative rounded-md inline-flex items-center rounded-r-md px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20">
+                    <Link :class="!links[links.length - 1].url ? 'pointer-events-none opacity-50' : null" preserveScroll :href="links[links.length - 1].url ? links[links.length - 1].url : ''" class="relative rounded-md inline-flex lg:hidden xl:inline-flex items-center rounded-r-md px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20">
                         <span class="sr-only">Next</span>
                         <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
                     </Link>

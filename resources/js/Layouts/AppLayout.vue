@@ -25,7 +25,11 @@ const navigation = [
 const sidebarOpen = ref(false)
 
 defineProps({
-    title: String
+    title: String,
+    searchSelectItems: {
+        type: Object,
+        default: {}
+    }
 });
 
 const logout = () => {
@@ -37,29 +41,53 @@ const logout = () => {
 
 <script>
 
+import {ref} from "vue";
+
 export default {
     data() {
         return {
             message: null,
             searchValue: '',
+            sourceValue: ref(null),
         }
     },
     methods: {
-        search(event) {
-            this.searchValue = event.target.value;
+        search(searchValue, sourceValue) {
+            let data = { search: searchValue, source: sourceValue };
+            if(sourceValue === null) {
+                data = { search: searchValue };
+            }
+
             router.get(
                 this.route(this.route().current()),
-                { search: event.target.value },
+                data,
                 {
                     replace: true,
                     only: ['transactions'],
                 }
             )
         },
+        searchInput(event) {
+            this.searchValue = event.target.value
+        },
+        sourceInput(event) {
+            const val = event.target.value;
+
+            if(val === 'All Sources' || val === '') {
+                this.sourceValue = null;
+            } else {
+                this.sourceValue = val;
+            }
+            this.searchEnter();
+        },
+        searchEnter() {
+            this.search(this.searchValue, this.sourceValue);
+        },
     },
     mounted() {
         let urlParams = new URLSearchParams(window.location.search);
         this.searchValue = (urlParams.get('search'));
+        this.sourceValue = (urlParams.get('source'));
 
         if(urlParams.get('search') && !urlParams.get('page')) {
             this.$nextTick(() => this.$refs.search_input.focus())
@@ -202,18 +230,29 @@ export default {
                             <span class="sr-only">Open sidebar</span>
                             <Bars3Icon class="h-6 w-6" aria-hidden="true" />
                         </button>
-                        <h1 class="text-2xl mt-2 ml-2 md:ml-0 font-semibold text-gray-900">
+                        <h1 class="text-2xl mt-2 ml-2 mr-6 md:ml-0 font-semibold text-gray-900">
                             {{ title }}
                         </h1>
 
                         <!-- Search -->
-                        <div v-if="this.route().current() === 'transactions'" class="max-w-xs w-[25%] ml-auto">
-                            <label for="search" class="sr-only">Search</label>
-                            <div class="relative text-gray-400 text-opacity-75">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <MagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
+                        <div v-if="this.route().current() === 'transactions'" class="max-w-xs ml-auto">
+                            <div class="flex -space-x-px mt-1">
+                                <label for="search" class="sr-only">Search</label>
+                                <div class="relative text-gray-400 text-opacity-75">
+                                    <div class="pointer-events-none hidden absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <MagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
+                                    </div>
+                                    <input ref="search_input" name="search_input" @keyup="searchInput" @keyup.enter="searchEnter" :value="searchValue" id="search" class="block text-sm float-left peer w-full sm:w-[55%] sm:border-r-gray-300 sm:border-opacity-70 bg-opacity-70 rounded-md sm:rounded-r-none border border-transparent focus:border-gray-300 focus:border-r-gray-200 focus:shadow-sm bg-gray-200 py-2 pl-3.5 pr-3 sm:border-r-[0.5px] leading-5 focus:bg-white text-gray-500 focus:text-gray-900 sm:focus:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm placeholder-gray-400" placeholder="Search..." type="search" />
+                                    <select v-model="sourceValue" @change="sourceInput" ref="source_select" name="source_select" class="hidden relative sm:block text-sm text-right w-[45%] bg-opacity-70 rounded-none rounded-r-md sm:border-l-gray-300 sm:border-opacity-70 border border-transparent bg-gray-200 py-2 pr-10 leading-5 peer-focus:bg-white text-gray-500 peer-focus:shadow-sm  peer-focus:border-gray-300 focus:border-l-gray-300 peer-focus:outline-none focus:outline-none sm:border-l-[0.5px] peer-focus:border-l-gray-200 peer-focus:ring-0 focus:z-10 focus:border-transparent focus:ring-0 sm:text-sm">
+                                        <option :value="null">All Sources</option>
+                                        <option v-for="selectItem in searchSelectItems" :value="selectItem.name">{{ selectItem.name }}</option>
+                                    </select>
                                 </div>
-                                <input ref="search_input" @keyup.enter="search" :value="searchValue" id="search" class="block w-full bg-opacity-70 rounded-md border border-transparent focus:border-gray-300 focus:shadow-sm bg-gray-200 py-2 pl-10 pr-3 leading-5 focus:bg-white text-gray-500 focus:text-gray-900 sm:focus:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm placeholder-transparent sm:placeholder-gray-400" placeholder="Search" type="search" name="search" />
+
+                            </div>
+                            <div class="flex-1">
+                                    <label for="country" class="sr-only">Country</label>
+
                             </div>
                         </div>
 

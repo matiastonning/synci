@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\TransactionStatus;
 use App\Jobs\ParseEmail;
 use App\Models\InboundEmail;
+use App\Models\Source;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,24 +18,38 @@ class TransactionsController extends Controller
     {
         $user = $request->user();
         $search = $request->query('search');
+        $source = $request->query('source');
 
         // Check for search input
         if ($search) {
-            $transactions = Transaction::where('user_id', $user->id)->with('source:id,name,identifier')
-                ->where(function($query) use ($search){
-                $query->where('description_long', 'LIKE', '%'.$search.'%')
-                    ->orWhere('category', 'LIKE', '%'.$search.'%')
-                    ->orWhere('reference', 'LIKE', '%'.$search.'%')
-                    ->orWhere('merchant_category', 'LIKE', '%'.$search.'%')
-                    ->orWhere('amount', 'LIKE', '%'.$search.'%');
-            })->orderBy('booking_date', 'desc');
+            $transactions = Transaction::where('user_id', $user->id)
+                ->with('source:id,name,identifier')
+                ->where(function($query) use ($search) {
+                    $query->where('description_long', 'LIKE', '%'.$search.'%')
+                        ->orWhere('category', 'LIKE', '%'.$search.'%')
+                        ->orWhere('reference', 'LIKE', '%'.$search.'%')
+                        ->orWhere('merchant_category', 'LIKE', '%'.$search.'%')
+                        ->orWhere('amount', 'LIKE', '%'.$search.'%')
+                        ->orWhereRelation('source', 'name', 'LIKE', '%' . $search . '%')
+                        ->orWhereRelation('source', 'identifier', 'LIKE', '%' . $search . '%');
+                    })
+                ->when($source, function ($query, $source) {
+                    return $query->whereRelation('source', 'name', $source);
+                })
+                ->orderBy('booking_date', 'desc');
         } else {
-            $transactions = Transaction::where('user_id', $user->id)->with('source:id,name,identifier')->orderBy('payment_date', 'desc');
+            $transactions = Transaction::where('user_id', $user->id)
+                ->with('source:id,name,identifier')
+                ->when($source, function ($query, $source) {
+                    return $query->whereRelation('source', 'name', $source);
+                })
+                ->orderBy('booking_date', 'desc');
         }
 
         return Inertia::render('Transactions', [
-            'transactions' => $transactions->paginate(40)->withQueryString(),
-            'transactionStatuses' => TransactionStatus::asArray()
+            'transactions' => $transactions->paginate(50)->onEachSide(1)->withQueryString(),
+            'transactionStatuses' => TransactionStatus::asArray(),
+            'sources' => Source::where('user_id', $user->id)->whereNotNull('name')->whereNotNull('identifier')->orderBy('created_at', 'desc')->with('connectionLink')->get(),
         ]);
     }
 

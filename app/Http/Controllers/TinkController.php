@@ -136,11 +136,11 @@ class TinkController extends Controller
         $expiryDate = Carbon::parse($apiCredential->expires_at);
         if (!$expiryDate->isPast()) {
             // get the access token from the ApiCredential
-            $accessToken = $apiCredential->token1;
-            Log::info('ApiCredential is not expired.');
+            $accessToken = Crypt::decryptString($apiCredential->token1);
+            Log::info('ApiCredential is not expired.', ['ApiCredential' => $apiCredential]);
             return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
         } else {
-            Log::info('ApiCredential is expired, getting new.');
+            Log::info('ApiCredential is expired, getting new.', ['ApiCredential' => $apiCredential]);
         }
 
         // generate new auth code with scope: authorization:grant
@@ -199,7 +199,7 @@ class TinkController extends Controller
         $user = User::findOrFail($userId);
 
         // get access token
-        $accessToken = Crypt::decryptString($this->getAccessToken($user, $apiCredential)->getData()->accessToken);
+        $accessToken = $this->getAccessToken($user, $apiCredential)->getData()->accessToken;
 
         // get accounts with access token
         if($source) {
@@ -249,6 +249,8 @@ class TinkController extends Controller
 
     public function fetchTransactions($userId, $source, $startDate, $nextPageToken = null): JsonResponse
     {
+        //TODO: Add consent check, prompt user to re-consent if needed
+
         // check if source is active
         if(!$source->active) {
             return response()->json([
@@ -261,7 +263,7 @@ class TinkController extends Controller
         $apiCredential = $source->user->apiCredentials()->where('active', true)->where('source_type', $source->type)->first();
 
         // get access token
-        $accessToken = Crypt::decryptString($this->getAccessToken(User::findOrFail($userId), $apiCredential)->getData()->accessToken);
+        $accessToken = $this->getAccessToken(User::findOrFail($userId), $apiCredential)->getData()->accessToken;
 
         // use Carbon to format start date as YYYY-MM-DD
         $startDate = Carbon::parse($startDate)->format('Y-m-d');

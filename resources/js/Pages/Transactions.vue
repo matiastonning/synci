@@ -17,6 +17,10 @@ export default {
         transactionStatuses: {
             type: Object,
             default: {}
+        },
+        sources: {
+            type: Object,
+            default: {}
         }
     },
     data() {
@@ -53,7 +57,7 @@ export default {
                 'Description': description,
                 'Details': details,
                 'Amount': amount,
-                'Date': date,
+                'Booking Date': date,
                 'Source Name': sourceName,
                 'Source Identifier': sourceIdentifier,
                 'Status': status,
@@ -145,7 +149,7 @@ export default {
 </script>
 
 <template>
-    <AppLayout title="Transactions">
+    <AppLayout title="Transactions" :search-select-items="sources">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Transactions

@@ -53,10 +53,11 @@ export default {
     },
     methods: {
         search(searchValue, sourceValue) {
-            let data = { search: searchValue, source: sourceValue };
-            if(sourceValue === null) {
-                data = { search: searchValue };
-            }
+            let data = {
+                // set query params if they are not empty
+                ...((searchValue !== '' && searchValue !== null) && {search: searchValue}),
+                ...((sourceValue !== '' && sourceValue !== null) && {source: sourceValue}),
+            };
 
             router.get(
                 this.route(this.route().current()),

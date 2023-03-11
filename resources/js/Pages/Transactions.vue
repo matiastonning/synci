@@ -3,10 +3,12 @@ import AppLayout from '../Layouts/AppLayout.vue';
 import TableStickyHeader from "../Comps/TableStickyHeader.vue";
 import Slider from "../Comps/Slider.vue";
 import DescriptionList from "../Comps/DescriptionList.vue";
+import SimpleFeed from "../Comps/SimpleFeed.vue";
 </script>
 
 <script>
 import moment from "moment";
+import {ExclamationCircleIcon, CheckIcon, ExclamationTriangleIcon, ArrowsRightLeftIcon} from "@heroicons/vue/24/outline";
 
 export default {
     props: {
@@ -15,6 +17,10 @@ export default {
             default: {},
         },
         transactionStatuses: {
+            type: Object,
+            default: {}
+        },
+        transferLogStatuses: {
             type: Object,
             default: {}
         },
@@ -29,6 +35,8 @@ export default {
             transactionItems: [],
             sliderOpen: false,
             selectedItem: {},
+            selectedItemLogs: [],
+            selectedItemTitle: '',
             transactionTitles: [
                 { name: 'Description', class: '' },
                 { name: 'Amount', class: '' },
@@ -44,35 +52,61 @@ export default {
             console.log('Retry clicked for ' + selectedItemId);
         },
         tableActionClicked(event) {
-            const description = event.items[0] ? this.removeHtmlTags(event.items[0].value) : '';
-            const details = event.items[1] ? this.removeHtmlTags(event.items[1].value) : '';
-            const amount = event.items[2] ? this.removeHtmlTags(event.items[2].value) : '';
-            const date = event.items[3] ? this.removeHtmlTags(event.items[3].value) : '';
-            const sourceName = event.items[4] ? this.removeHtmlTags(event.items[4].value) : '';
-            const sourceIdentifier = event.items[5] ? this.removeHtmlTags(event.items[5].value) : '';
-            const status = event.items[6] ? this.removeHtmlTags(event.items[6].value) : '';
-            const id = event.items[7] ? this.removeHtmlTags(event.items[7].value) : '';
+            // transaction details
+            const transaction = this.transactions.data.find(transaction => transaction.uuid === event.id);
+            const transactionLogs = transaction.transfer_log;
+
+            this.selectedItemTitle = transaction.description_short ? transaction.description_short : '';
+
+            const details = transaction.description_long ? transaction.description_long : '';
+            const amount = transaction.amount && transaction.currency ? transaction.amount + ' ' + transaction.currency : '';
+            const date = transaction.booking_date ? moment(transaction.booking_date).utc().format('MMM Do, YYYY') : '';
+            const sourceName = transaction.source.name ? transaction.source.name : '';
+            const sourceIdentifier = transaction.source.identifier ? transaction.source.identifier : '';
+            const status = event.items[4] ? event.items[4].value : '';
+            const id = transaction.uuid ? transaction.uuid : '';
 
             this.selectedItem = {
-                'Description': description,
-                'Details': details,
+                'Description': details,
                 'Amount': amount,
                 'Booking Date': date,
-                'Source Name': sourceName,
-                'Source Identifier': sourceIdentifier,
+                'Source': sourceName + ' (' + sourceIdentifier + ')',
                 'Status': status,
-                'ID': id,
+                'ID': '<span class="text-xs text-gray-500">'+ id + '</span>',
             };
 
+            this.selectedItemLogs = [];
+            transactionLogs.forEach(transactionLog => {
+                let iconBackground = 'bg-gray-200';
+                let iconColor = 'text-gray-600';
+                let icon = ArrowsRightLeftIcon;
+
+                if(transactionLog.status_code === this.transferLogStatuses['SUCCESS']) {
+                    iconBackground = 'bg-teal-200';
+                    iconColor = 'text-teal-700';
+                    icon = CheckIcon;
+                } else if(transactionLog.status_code === this.transferLogStatuses['WARNING']) {
+                    iconBackground = 'bg-orange-200';
+                    iconColor = 'text-orange-700';
+                    icon = ExclamationTriangleIcon;
+                } else if(transactionLog.status_code === this.transferLogStatuses['ERROR']) {
+                    iconBackground = 'bg-red-200';
+                    iconColor = 'text-red-700';
+                    icon = ExclamationCircleIcon;
+                }
+
+                this.selectedItemLogs.push({
+                    'iconBackground': iconBackground,
+                    'iconColor': iconColor,
+                    'icon': icon,
+                    'content': transactionLog.status_message.replace(/"([^"]+)"/g, '<span class="font-semibold text-gray-600">$1</span>'),
+                    'date': moment(transactionLog.created_at).utc().format('MMM D, HH:mm'),
+                });
+            });
             this.sliderOpen = true;
         },
         sliderClosed() {
             this.sliderOpen = false;
-        },
-        removeHtmlTags(htmlString) {
-            const tmp = document.createElement('DIV');
-            tmp.innerHTML = htmlString;
-            return tmp.textContent || tmp.innerText || '';
         }
     },
     mounted() {
@@ -84,7 +118,7 @@ export default {
             let transactionClass = '';
             if(transaction.status === this.transactionStatuses['PENDING']) {
                 transactionStatus = 'Pending';
-                transactionClass = 'bg-gray-100 text-gray-800';
+                transactionClass = 'bg-black bg-opacity-5 text-gray-800';
             } else if(transaction.status === this.transactionStatuses['TRANSFERRED']) {
                 transactionStatus = 'Transferred';
                 transactionClass = 'bg-teal-100 text-teal-800';
@@ -97,6 +131,9 @@ export default {
             } else if(transaction.status === this.transactionStatuses['FAILED_ALL']) {
                 transactionStatus = 'Failed';
                 transactionClass = 'bg-red-100 text-red-800';
+            } else if(transaction.status === this.transactionStatuses['FAILED_DUPLICATE']) {
+                transactionStatus = 'Duplicate';
+                transactionClass = 'bg-orange-100 text-orange-800';
             }
 
             this.transactionItems.push({
@@ -107,15 +144,11 @@ export default {
                         class: '',
                     },
                     {
-                        value: transaction.description_long,
-                        class: 'hidden',
-                    },
-                    {
                         value: transaction.amount + ' <span class="opacity-60 hidden sm:inline">' + transaction.currency + '</span>',
                         class: '',
                     },
                     {
-                        value: moment(transaction.booking_date).format('MMM Do, YYYY'),
+                        value: moment(transaction.booking_date).utc().format('MMM Do, YYYY'),
                         class: 'hidden sm:table-cell md:hidden lg:table-cell',
                     },
                     {
@@ -123,18 +156,10 @@ export default {
                         class: 'hidden xl:table-cell',
                     },
                     {
-                        value: transaction.source.identifier,
-                        class: 'hidden',
-                    },
-                    {
                         value: '<span class="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium ' + transactionClass + '">'
                             + transactionStatus
                             + '</span>',
                         class: 'hidden lg:table-cell',
-                    },
-                    {
-                        value: transaction.uuid,
-                        class: 'hidden',
                     },
                 ],
                 action: {
@@ -163,12 +188,17 @@ export default {
                 </div>
             </div>
         </div>
-        <Slider title="Transaction" subtitle="Transaction details"
+        <Slider :title="selectedItemTitle" subtitle="Transaction details"
                 :action-button="{ text: 'Retry', class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2' }"
                 :open="sliderOpen" :selected-id="selectedItem.ID"
                 @close-slider="sliderClosed" @action-clicked="(e) => sliderActionClicked(e)">
 
             <DescriptionList :selected-item="selectedItem" />
+
+            <hr/>
+
+            <h2 class="font-medium">Logs</h2>
+            <SimpleFeed :events="selectedItemLogs" />
 
         </Slider>
     </AppLayout>

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Enums\ApiCredentialType;
 use App\Enums\SourceType;
+use App\Enums\TransferStatus;
 use App\Models\ApiCredential;
 use App\Models\Source;
 use App\Models\Transaction;
+use App\Models\TransferLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -17,9 +19,9 @@ use Illuminate\Support\Str;
 
 class TinkController extends Controller
 {
-    public function createUser($userId, $countryCode): JsonResponse
+    public function createUser($user, $countryCode): JsonResponse
     {
-        if(ApiCredential::where('user_id', $userId)->where('source_type', SourceType::Tink)->exists()) {
+        if(ApiCredential::where('user_id', $user->id)->where('source_type', SourceType::Tink)->exists()) {
             return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'API credentials already exist for this source.'], 204);
         } else {
             // authorize app
@@ -42,14 +44,14 @@ class TinkController extends Controller
 
             // create a new API credential
             $apiCredential = new ApiCredential();
-            $apiCredential->user_id = $userId;
+            $apiCredential->user_id = $user->id;
             $apiCredential->type = ApiCredentialType::OAuth;
             $apiCredential->source_type = SourceType::Tink;
 
             // create a new user
             $response = Http::withToken($accessToken)
                 ->post('https://api.tink.com/api/v1/user/create', [
-                    'external_user_id' => 'uid:'.$userId . ', aid:' . $apiCredential->id,
+                    'external_user_id' => $user->uuid,
                     'market' => $countryCode,
                     'locale' => 'en_US',
                 ]);
@@ -104,6 +106,90 @@ class TinkController extends Controller
         return response()->json(['status' => 'success','statusTitle' => 'Success',  'statusMessage' => $url], 200);
     }
 
+    public function refreshConsent($user, $apiCredential, $reauthenticate = false): JsonResponse
+    {
+        // get access token
+        $accessTokenObj = $this->getAccessToken($user, $apiCredential)->getData();
+        $accessToken = $accessTokenObj->accessToken;
+
+        if($accessTokenObj->status == 'error') {
+            Log::error('Unable to get access token.', ['response' => $accessTokenObj]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to get access token.'], 401);
+        }
+
+        $response = Http::withToken($accessToken)
+            ->post('https://api.tink.com/api/v1/credentials/'. $apiCredential->identifier2 .'/refresh', [
+                'appUri' => env('APP_URL'),
+                'callbackUri' => 'http://localhost/connect/sources/1/callback',
+                'userAvailability' => [
+                    'userAvailableForInteraction' => $reauthenticate,
+                    'userPresent' => $reauthenticate
+                ]
+            ]);
+
+        if ($response->failed()) {
+            Log::error('Unable to refresh consent.', ['response' => $response]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to refresh consent.'], 401);
+        }
+
+        // return the access token
+        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Refreshed consent.'], 200);
+    }
+
+    public function pollConsent($user, $apiCredential): JsonResponse
+    {
+        // get access token
+        $accessTokenObj = $this->getAccessToken($user, $apiCredential)->getData();
+        $accessToken = $accessTokenObj->accessToken;
+
+        if($accessTokenObj->status == 'error') {
+            Log::error('Unable to get access token.', ['response' => $accessTokenObj]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to get access token.'], 401);
+        }
+
+        $response = $this->checkConsent($apiCredential, $accessToken)->getData();
+
+        if($response->status == 'error') {
+            Log::error('Unable to poll for changes in consent.', ['response' => $response]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to poll for changes in consent.'], 401);
+        }
+
+        // return the access token
+        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Refreshed consent.'], 200);
+    }
+
+    private function checkConsent($apiCredential, $accessToken): JsonResponse
+    {
+        sleep(1);
+
+        // get provider consent
+        $response = Http::withToken($accessToken)
+            ->get('https://api.tink.com/api/v1/provider-consents', [
+                'credentialsId' => $apiCredential->identifier2,
+            ]);
+
+        // handle error
+        if ($response->failed()) {
+            Log::error('Unable to poll for consents.', ['response' => $response]);
+            return response()->json(['status' => 'error', 'statusTitle' => 'Error', 'statusMessage' => 'Unable to poll for consents.'], 401);
+        }
+
+        // get provider consent
+        $providerConsent = $response->json()['providerConsents'][0];
+
+        Log::info('Checking consent', $providerConsent);
+
+        // if consent is not updated, check again
+        if ($providerConsent['status'] == 'UPDATED') {
+
+        } else {
+            $this->checkConsent($apiCredential, $accessToken);
+            exit;
+        }
+
+        return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Refreshed consent.'], 200);
+    }
+
     private function generateClientAuthCode($grantType, $scope): JsonResponse {
         $response = Http::asForm()
             ->post('https://api.tink.com/api/v1/oauth/token', [
@@ -137,7 +223,6 @@ class TinkController extends Controller
         if (!$expiryDate->isPast()) {
             // get the access token from the ApiCredential
             $accessToken = Crypt::decryptString($apiCredential->token1);
-            Log::info('ApiCredential is not expired.', ['ApiCredential' => $apiCredential]);
             return response()->json(['status' => 'success', 'statusTitle' => 'Success', 'statusMessage' => 'Got access token.', 'accessToken' => $accessToken], 200);
         } else {
             Log::info('ApiCredential is expired, getting new.', ['ApiCredential' => $apiCredential]);
@@ -153,10 +238,8 @@ class TinkController extends Controller
 
         // get user auth code
         $response = Http::asForm()->withToken($clientAccessToken)
-            ->post('https://api.tink.com/api/v1/oauth/authorization-grant/delegate', [
-                'actor_client_id' => env('TINK_CLIENT_ID'),
+            ->post('https://api.tink.com/api/v1/oauth/authorization-grant', [
                 'user_id' => $apiCredential->identifier,
-                'id_hint' => $user->email,
                 'scope' => 'accounts:read,balances:read,transactions:read,provider-consents:read,credentials:refresh',
             ]);
 
@@ -293,7 +376,7 @@ class TinkController extends Controller
 
         foreach ($transactions as $transaction) {
             // add transaction to database
-            Transaction::firstOrCreate([
+            $transaction = Transaction::firstOrCreate([
                 'source_id' => $source->id,
                 'user_id' => $userId,
                 'external_id' => $transaction['id'],
@@ -318,6 +401,17 @@ class TinkController extends Controller
 
                 'uuid' => Str::uuid(),
             ]);
+
+            // create transfer log
+            if($transaction) {
+                $transferLog = new TransferLog();
+                $transferLog->user_id = $userId;
+                $transferLog->source_id = $source->id;
+                $transferLog->transaction_id = $transaction->id;
+                $transferLog->status_code = TransferStatus::PENDING();
+                $transferLog->status_message = 'Transaction fetched from source "' . $source->name . ' (' . $source->identifier . ')".';
+                $transferLog->save();
+            }
         }
 
         if(isset($transactionsObj['nextPageToken']) && $transactionsObj['nextPageToken'] != "") {

@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Enums\SourceType;
 use App\Http\Controllers\TinkController;
+use App\Jobs\FetchAccounts;
+use App\Jobs\FetchTransactions;
 use App\Models\ApiCredential;
 use App\Models\Source;
 use Carbon\Carbon;
@@ -11,6 +13,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use function PHPUnit\Framework\isNan;
 
 class RefreshTransactions extends Command
 {
@@ -35,15 +39,10 @@ class RefreshTransactions extends Command
      */
     public function handle()
     {
-        //TODO: Make this a scheduled job
         $tink = new TinkController();
 
-        $logMessage = 'Refreshing transactions.';
-        Log::info($logMessage);
-        $this->info($logMessage);
-
         //Get active sources and refresh transactions for each
-        $activeSources = Source::where('active', true)->where('last_synced', '<=', Carbon::now()->subHours(6)->toDateTimeString())->get();
+        $activeSources = Source::where('active', true)->where('last_synced', '<=', Carbon::now()->subHours(0)->toDateTimeString())->get();
 
         //If no sources need to be refreshed, exit
         if($activeSources->count() === 0) {
@@ -51,6 +50,8 @@ class RefreshTransactions extends Command
             $this->info($logMessage);
             return 1;
         }
+
+        $apiCredentialsRefreshed = [];
 
         foreach ($activeSources as $source) {
             $logMessage = 'Refreshing accounts and transactions for source with ID ' . $source->id . '.';
@@ -67,26 +68,51 @@ class RefreshTransactions extends Command
                 return 1;
             }
 
-            //Get last synced date
-            $lastSynced = $source->last_synced;
-
-            //Refresh transactions
-            $response = $tink->fetchTransactions($source->user->id, $source, $lastSynced);
-
-            //Refresh accounts
-            $tink->fetchAccounts($source->user->id, $apiCredential, $source);
-
-            $logMessage = 'Successfully refreshed transactions for source with ID ' . $source->id . '.';
-
-            // handle error
-            if($response->original['status'] == 'error') {
-                $logMessage = $response->original['statusMessage'];
-                $this->info($logMessage);
-                return 1;
+            /* refresh API credential consent
+            if($source->type == SourceType::Tink) {
+                $this->info('Refreshing consent');
+                $response = $tink->refreshConsent($source->user, $apiCredential);
+                if($response->original['status'] == 'error') {
+                    $logMessage = $response->original['statusMessage'];
+                    $this->info($logMessage);
+                    return 1;
+                }
             }
+
+
+            // poll for consent update
+            if($source->type == SourceType::Tink) {
+                $this->info('Polling for consent update');
+                $response = $tink->pollConsent($source->user, $apiCredential);
+                if($response->original['status'] == 'error') {
+                    $logMessage = $response->original['statusMessage'];
+                    $this->info($logMessage);
+                    return 1;
+                }
+            }*/
+
+            // get most recent transaction
+            $lastTransactionDate = $source->transactions()->orderBy('booking_date', 'desc')->first()->booking_date ?? $source->last_synced;
+
+            // dispatch fetch transactions job
+            FetchTransactions::dispatch($source, $lastTransactionDate, Str::uuid());
+            $logMessage = 'Dispatched transaction job for source with ID ' . $source->id . '.';
+            $this->info($logMessage);
+
+            // check if API credential has already been refreshed
+            if(in_array($apiCredential->id, $apiCredentialsRefreshed)) {
+                $logMessage = 'API credential with ID ' . $apiCredential->id . ' has already been refreshed.';
+            } else {
+                // dispatch fetch accounts job
+                FetchAccounts::dispatch($source, $apiCredential, Str::uuid());
+                $apiCredentialsRefreshed[] = $apiCredential->id;
+                $logMessage = 'Dispatched accounts job for source with ID ' . $source->id . '.';
+            }
+
+            $this->info($logMessage);
         }
 
-        $this->info($logMessage);
+        $this->info('Done.');
         return 0;
     }
 }

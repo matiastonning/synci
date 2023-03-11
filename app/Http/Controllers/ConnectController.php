@@ -26,7 +26,7 @@ class ConnectController extends Controller
     public function sources(Request $request): \Inertia\Response
     {
         $user = $request->user();
-        $destinations = Destination::select('id', 'name AS subtitle', 'type')->where('user_id', $user->id)->where('active', true)->whereNotNull('name')->orderBy('created_at', 'desc')->get();
+        $destinations = Destination::select('id', 'name', 'account_name AS subtitle', 'type')->where('user_id', $user->id)->where('active', true)->whereNotNull('name')->orderBy('created_at', 'desc')->get();
         $sources = Source::where('user_id', $user->id)->whereNotNull('name')->whereNotNull('identifier')->orderBy('created_at', 'desc')->with('connectionLink')->get();
         $countries = Country::select('name', 'flag AS icon', 'iso_3166_2 AS key')
             ->whereIn('iso_3166_2', array('AT', 'BE', 'DK', 'EE', 'FI', 'FR', 'DE', 'IE', 'IT', 'LV', 'LT', 'NL', 'NO', 'PL', 'PT', 'ES', 'SE', 'GB'))->get();
@@ -37,7 +37,7 @@ class ConnectController extends Controller
 
         foreach($destinations as $destination) {
             $destination->icon = '../assets/icons/' . strtolower(BudgetType::fromValue($destination->type)->description) . '.png';
-            $destination->title = strtoupper(BudgetType::fromValue($destination->type)->description);
+            $destination->title = $destination->name;
         }
 
         foreach($sources as $source) {
@@ -47,7 +47,8 @@ class ConnectController extends Controller
                     // add destination if it exists
                     $destination = $destinations->where('id', $source->connectionLink->destination_id)->first();
                     $source->destination_type = $destination->title;
-                    $source->destination_name = $destination->subtitle;
+                    $source->destination_name = $destination->name;
+                    $source->destination_account = $destination->subtitle;
                 } else {
                     // set source to inactive if no connection link exists
                     $source->active = false;
@@ -81,13 +82,16 @@ class ConnectController extends Controller
 
     public function connectBudgetOauth($budgetType): \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
     {
-        $url = null;
-        if($budgetType == BudgetType::YNAB) {
-            $url = 'https://app.youneedabudget.com/oauth/authorize?client_id=' . env('YNAB_CLIENT_ID') . '&redirect_uri=' . route('connect.budgets.callback', ['budgetType' => BudgetType::YNAB()]) . '&response_type=code';
-            return response(['url' => $url], 200);
+        $ynab = new YnabController();
+        $response = $ynab->getOauthUrl();
+
+        // handle error
+        if($response->original['status'] == 'error') {
+            Log::error('Failed to get YNAB OAuth URL.', ['response' => $response]);
+            return response(['status' => 'error', 'statusTitle' => 'Error', 'Failed to get YNAB OAuth URL.'], 500);
         }
 
-        return response(['url' => $url], 400);
+        return response(['url' => $response->original['url']], 200);
     }
 
     public function connectSourceOauth(Request $request, $sourceType)
@@ -103,7 +107,7 @@ class ConnectController extends Controller
 
         if($sourceType == SourceType::Tink) {
             // create Tink user if it doesn't exist
-            $response = $tink->createUser($request->user()->id, $country);
+            $response = $tink->createUser($request->user(), $country);
 
             // handle error
             if($response->original['status'] == 'error') {
@@ -218,80 +222,77 @@ class ConnectController extends Controller
         $user = $request->user();
 
         if($budgetType == BudgetType::YNAB) {
+            $ynab = new YnabController();
             $authCode = $request->query('code');
 
             //Use auth code to get access token
-            $response = Http::post('https://app.youneedabudget.com/oauth/token', [
-                'client_id' => env('YNAB_CLIENT_ID'),
-                'client_secret' => env('YNAB_CLIENT_SECRET'),
-                'redirect_uri' => route('connect.budgets.callback', ['budgetType' => BudgetType::YNAB()]),
-                'grant_type' => 'authorization_code',
-                'code' => $authCode
-            ]);
+            $response = $ynab->getAccessToken($authCode);
 
-            //Check if successful response
-            if($response->failed()) {
-                Log::error('Failed to authenticate with YNAB.', ['response' => $response]);
+            // handle error
+            if($response->original['status'] == 'error') {
+                Log::error($response->original['statusMessage'], ['response' => $response]);
                 return to_route('connect.budgets')->with([
                     'message' => [
-                        'statusTitle' => 'Error',
-                        'statusMessage' => 'Failed to authenticate with YNAB.',
-                        'status' => 'success'
+                        'statusTitle' => $response->original['statusTitle'],
+                        'statusMessage' => $response->original['statusMessage'],
+                        'status' => $response->original['status']
                     ]
                 ]);
             }
 
-            $accessToken = $response->json()['access_token'];
-            $refreshToken = $response->json()['refresh_token'];
-            $expiresIn = $response->json()['expires_in'];
+            // define variables
+            $accessToken = $response->original['accessToken'];
+            $refreshToken = $response->original['refreshToken'];
+            $expiresIn = $response->original['expiresIn'];
             $expiresAt =  Carbon::now()->addSeconds($expiresIn);
 
-            //Get selected budget
-            $budgetObj = Http::withToken($accessToken)->get('https://api.youneedabudget.com/v1/budgets/default');
+            // fetch budget
+            $response = $ynab->fetchBudget($user, $accessToken);
 
-            //Check if successful response and contains budget
-            if($budgetObj->successful() && $budgetObj['data']['budget']['id']) {
-                $budgetId = $budgetObj->json()['data']['budget']['id'];
-                $budgetName = $budgetObj->json()['data']['budget']['name'];
-
-                //Create destination for budget
-                $destination = Destination::updateOrCreate([
-                    'user_id' => $user->id,
-                    'type' => BudgetType::YNAB,
-                    'identifier' => $budgetId,
-                ],[
-                    'user_id' => $user->id,
-                    'type' => BudgetType::YNAB,
-                    'identifier' => $budgetId,
-                    'name' => $budgetName,
-                ]);
-            } else {
-                Log::error('Failed to get YNAB budget.', ['response' => $budgetObj]);
+            // handle error
+            if($response->original['status'] == 'error') {
+                Log::error($response->original['statusMessage'], ['response' => $response]);
                 return to_route('connect.budgets')->with([
                     'message' => [
-                        'statusTitle' => 'Error',
-                        'statusMessage' => 'Failed to get YNAB budget.',
-                        'status' => 'success'
+                        'statusTitle' => $response->original['statusTitle'],
+                        'statusMessage' => $response->original['statusMessage'],
+                        'status' => $response->original['status']
                     ]
                 ]);
             }
 
-            //Get YNAB user id
-            $ynabUserObj = Http::withToken($accessToken)->get('https://api.youneedabudget.com/v1/user');
+            // set destination variable
+            $destinations = $response->original['destinations'];
 
-            //Check if successful response
-            if($ynabUserObj->failed()) {
-                Log::error('Failed to get YNAB user.', ['response' => $ynabUserObj]);
+            // check if there are any destinations
+            if(count($destinations) == 0) {
+                Log::error('No budget accounts found.', ['response' => $response]);
                 return to_route('connect.budgets')->with([
                     'message' => [
-                        'statusTitle' => 'Error',
-                        'statusMessage' => 'Failed to get YNAB user.',
-                        'status' => 'success'
+                        'statusTitle' => 'This budget has no accounts',
+                        'statusMessage' => 'No budget accounts found. Make sure you connect a budget that has at least one open account.',
+                        'status' => 'warning'
                     ]
                 ]);
             }
 
-            $ynabUserId = $ynabUserObj->json()['data']['user']['id'];
+            // get YNAB user id
+            $response = $ynab->getUserId($accessToken);
+
+            // handle error
+            if($response->original['status'] == 'error') {
+                Log::error($response->original['statusMessage'], ['response' => $response]);
+                return to_route('connect.budgets')->with([
+                    'message' => [
+                        'statusTitle' => $response->original['statusTitle'],
+                        'statusMessage' => $response->original['statusMessage'],
+                        'status' => $response->original['status']
+                    ]
+                ]);
+            }
+
+            // set user id variable
+            $ynabUserId = $response->original['user_id'];
 
             //Get API credentials registered to this YNAB user
             $apiCredentials = ApiCredential::where('destination_type', BudgetType::YNAB)->where('identifier', $ynabUserId)->get();
@@ -340,14 +341,16 @@ class ConnectController extends Controller
                 ]);
             }
 
-            //Set destination to active
-            $destination->active = true;
-            $destination->save();
+            //Set each destination to active
+            foreach($destinations as $destination) {
+                $destination->active = true;
+                $destination->save();
+            }
 
             return to_route('connect.budgets')->with([
                 'message' => [
                     'statusTitle' => 'Budget connected',
-                    'statusMessage' => 'Budget "' . $budgetName . '" has been added to Synci.io.',
+                    'statusMessage' => 'Budget "' . $destination->name . '" has been added to Synci.io.',
                     'status' => 'success'
                 ]
             ]);

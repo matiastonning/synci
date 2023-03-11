@@ -69,11 +69,11 @@ export default {
                                             <p class="text-sm text-gray-900">
                                                 Synced
                                                 {{ ' ' }}
-                                                <time :datetime="item.last_synced">{{ moment(item.last_synced).fromNow() }}</time>
+                                                <time :datetime="item.last_synced">{{ moment(item.last_synced).utc().fromNow() }}</time>
                                             </p>
                                             <p class="mt-2 flex items-center text-sm text-gray-500">
                                                 <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-teal-400" aria-hidden="true" />
-                                                Connected to {{ item.destination_type + ' (' + item.destination_name + ')' }}
+                                                Connected to {{ item.destination_name + ' (' + item.destination_account + ')' }}
                                             </p>
                                         </div>
                                         <div v-else class="flex mt-1 items-center">

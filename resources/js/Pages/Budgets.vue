@@ -106,8 +106,9 @@ export default {
                 this.selectedItem = {
                     'Budget app': item.type,
                     'Budget name': item.name,
+                    'Budget Account': item.account_name,
                     'Status': item.active ? 'Connected' : 'Disconnected',
-                    'Created': moment(item.created_at).format('MMMM Do YYYY, HH:mm:ss (UTC)'),
+                    'Created': moment(item.created_at).utc().format('MMMM Do, YYYY - HH:mm:ss (UTC)'),
                 };
             } else {
                 this.selectedItemId = null;
@@ -134,7 +135,9 @@ export default {
                     id: budget.id,
                     type: 'YNAB',
                     name: budget.name,
+                    account_name: budget.account_name,
                     identifier: budget.identifier,
+                    account_identifier: budget.account_identifier,
                     icon: '../assets/icons/ynab.png',
                     iconAlt: 'YNAB icon',
                     created_at: budget.created_at,
@@ -160,7 +163,7 @@ export default {
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg">
                     <ListCardWithActionBudgets
-                        title="Connected Budgets"
+                        title="Connected Accounts"
                         action="Add Budget"
                         :items="budgetItems"
                         @action-clicked="(item) => tableActionClicked(item)"
@@ -193,8 +196,8 @@ export default {
         <DeleteModal
             :open="deleteModalOpen"
             :selected-id="selectedItemId"
-            title="Delete Budget"
-            :message="'Are you sure you want to delete this budget? This action cannot be undone.'"
+            title="Delete Account"
+            :message="'Are you sure you want to delete this budget account? This action cannot be undone.'"
             @close-modal="deleteModalOpen = false"
             @confirm-modal="(id) => deleteBudget(id)"
         />

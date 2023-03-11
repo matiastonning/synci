@@ -33,4 +33,9 @@ class Transaction extends Model
     {
         return $this->hasMany(TransferLog::class);
     }
+
+    public function bookingDateAfterSourceStartDate(): bool
+    {
+        return $this->booking_date > $this->source->start_date;
+    }
 }

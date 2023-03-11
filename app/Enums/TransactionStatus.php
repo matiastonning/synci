@@ -7,9 +7,10 @@ use BenSampo\Enum\Enum;
 /**
  * @method static static PENDING()
  * @method static static TRANSFERRED()
- * @method static static FETCHED()
+ * @method static static TRANSFERRING()
  * @method static static FAILED_SOME()
  * @method static static FAILED_ALL()
+ * @method static static FAILED_DUPLICATE()
  */
 final class TransactionStatus extends Enum
 {
@@ -18,4 +19,5 @@ final class TransactionStatus extends Enum
     const TRANSFERRING = 2;
     const FAILED_SOME = 3;
     const FAILED_ALL = 4;
+    const FAILED_DUPLICATE = 5;
 }

@@ -6,6 +6,8 @@ use BenSampo\Enum\Enum;
 
 /**
  * @method static static Curve()
+ * @method static static Tink()
+ * @method static static Aiia()
  */
 final class SourceType extends Enum
 {

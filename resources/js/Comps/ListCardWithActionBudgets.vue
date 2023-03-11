@@ -53,10 +53,10 @@ export default {
                             </div>
                             <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                                 <div>
-                                    <p class="truncate text-sm font-medium text-teal-600">{{ item.type }}</p>
+                                    <p class="truncate text-sm font-medium text-teal-600">{{ item.name }}</p>
                                     <p class="mt-2 flex items-center text-sm text-gray-500">
                                         <WalletIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
-                                        <span class="truncate">{{ item.name }}</span>
+                                        <span class="truncate">{{ item.account_name }}</span>
                                     </p>
                                 </div>
                                 <div class="hidden md:block">
@@ -64,7 +64,7 @@ export default {
                                         <p class="text-sm text-gray-900">
                                             Created
                                             {{ ' ' }}
-                                            <time :datetime="item.created_at">{{ moment(item.created_at).fromNow() }}</time>
+                                            <time :datetime="item.created_at">{{ moment(item.created_at).utc().fromNow() }}</time>
                                         </p>
                                         <p class="mt-2 flex items-center text-sm text-gray-500">
                                             <CheckCircleIcon class="mr-1.5 h-5 w-5 flex-shrink-0 text-teal-400" aria-hidden="true" />

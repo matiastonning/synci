@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('type');
             $table->text('name')->nullable();
             $table->text('identifier')->nullable();
+            $table->text('account_name')->nullable();
+            $table->text('account_identifier')->nullable();
             $table->boolean('active')->default(false);
             $table->timestamps();
 

@@ -17,7 +17,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('transaction_id');
-            $table->unsignedBigInteger('destination_id');
+            $table->unsignedBigInteger('destination_id')->nullable();
+            $table->unsignedBigInteger('source_id')->nullable();
             $table->integer('status_code');
             $table->text('status_message');
             $table->timestamps();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('transaction_id')->references('id')->on('transactions');
             $table->foreign('destination_id')->references('id')->on('destinations');
+            $table->foreign('source_id')->references('id')->on('sources');
         });
     }
 

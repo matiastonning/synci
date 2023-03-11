@@ -20,11 +20,11 @@ class ConnectionLink extends Model
 
     public function source()
     {
-        return $this->hasOne(Source::class);
+        return $this->hasOne(Source::class, 'id', 'source_id');
     }
 
     public function destination()
     {
-        return $this->hasOne(Destination::class);
+        return $this->hasOne(Destination::class, 'id', 'destination_id');
     }
 }

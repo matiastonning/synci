@@ -236,23 +236,19 @@ export default {
                         </h1>
 
                         <!-- Search -->
-                        <div v-if="this.route().current() === 'transactions'" class="max-w-xs ml-auto">
+                        <div v-if="this.route().current() === 'transactions'" class="max-w-sm ml-auto">
                             <div class="flex -space-x-px mt-1">
                                 <label for="search" class="sr-only">Search</label>
                                 <div class="relative text-gray-400 text-opacity-75">
-                                    <div class="pointer-events-none hidden absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                         <MagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
                                     </div>
-                                    <input ref="search_input" name="search_input" @keyup="searchInput" @keyup.enter="searchEnter" :value="searchValue" id="search" class="block text-sm float-left peer w-full sm:w-[55%] sm:border-r-gray-300 sm:border-opacity-70 bg-opacity-70 rounded-md sm:rounded-r-none border border-transparent focus:border-gray-300 focus:border-r-gray-200 focus:shadow-sm bg-gray-200 py-2 pl-3.5 pr-3 sm:border-r-[0.5px] leading-5 focus:bg-white text-gray-500 focus:text-gray-900 sm:focus:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm placeholder-gray-400" placeholder="Search..." type="search" />
-                                    <select v-model="sourceValue" @change="sourceInput" ref="source_select" name="source_select" class="hidden relative sm:block text-sm text-right w-[45%] bg-opacity-70 rounded-none rounded-r-md sm:border-l-gray-300 sm:border-opacity-70 border border-transparent bg-gray-200 py-2 pr-10 leading-5 peer-focus:bg-white text-gray-500 peer-focus:shadow-sm  peer-focus:border-gray-300 focus:border-l-gray-300 peer-focus:outline-none focus:outline-none sm:border-l-[0.5px] peer-focus:border-l-gray-200 peer-focus:ring-0 focus:z-10 focus:border-transparent focus:ring-0 sm:text-sm">
+                                    <input ref="search_input" name="search_input" @keyup="searchInput" @keyup.enter="searchEnter" :value="searchValue" id="search" class="block text-sm float-left peer w-full sm:w-[55%] sm:border-opacity-100 bg-opacity-70 rounded-md sm:rounded-r-none border border-transparent focus:border-gray-300 focus:border-r-gray-200 focus:shadow-sm bg-gray-200 py-2 pl-10 pr-3 sm:border-r-[1px] sm:focus:border-r-[0.25px] leading-5 focus:bg-white text-gray-500 focus:text-gray-900 sm:focus:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm placeholder-gray-400" placeholder="Search..." type="search" />
+                                    <select v-model="sourceValue" @change="sourceInput" ref="source_select" name="source_select" class="bg-gray-200 bg-opacity-70 w-[45%] border border-transparent leading-5 hidden sm:block peer-focus:border-gray-300 peer-focus:border-l-gray-200 peer-focus:bg-white peer-focus:outline-none peer-focus:ring-0 peer-focus:shadow-sm py-2 pr-9 relative rounded-none rounded-r-md sm:border-l-[0.25px] sm:border-opacity-100 sm:border-l-[0.5px] sm:text-sm text-gray-500 text-right focus:border-transparent focus:outline-none focus:ring-0 focus:z-10">
                                         <option :value="null">All Sources</option>
                                         <option v-for="selectItem in searchSelectItems" :value="selectItem.name">{{ selectItem.name }}</option>
                                     </select>
                                 </div>
-
-                            </div>
-                            <div class="flex-1">
-                                    <label for="country" class="sr-only">Country</label>
 
                             </div>
                         </div>

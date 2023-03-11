@@ -10,7 +10,7 @@ class Destination extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',  'type', 'identifier', 'name', 'active'
+        'user_id',  'type', 'identifier', 'name', 'account_identifier', 'account_name', 'active'
     ];
 
     public function user()

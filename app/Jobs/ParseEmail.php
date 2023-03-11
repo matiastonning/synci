@@ -162,7 +162,7 @@ class ParseEmail implements ShouldQueue, ShouldBeUnique
         Log::info('Created transaction, adding to transfer queue.', ['transaction' => $transaction]);
 
         //Send transaction to transfer job
-        TransferTransaction::dispatch($transaction, Str::uuid());
+        TransferTransactions::dispatch($transaction, Str::uuid());
     }
 
     /**

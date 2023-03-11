@@ -173,14 +173,14 @@ export default {
             if (item) {
                 this.selectedItemId = item.id;
                 this.selectedItem = {
-                    'Status': item.active ? 'Active' : 'Inactive',
+                    'Status': item.active ? 'Connected to ' + item.destination_name + ' (' + item.destination_account + ')' : 'Inactive',
                     'Type': item.type,
                     'Integrator': item.integrator,
                     'Account Name': item.name,
                     'Account Number': item.account,
-                    'Last Sync': moment(item.last_synced).format('MMMM Do YYYY, HH:mm:ss (UTC)'),
-                    'Start Date': moment(item.start_date).format('MMMM Do YYYY, HH:mm:ss (UTC)'),
-                    'Created': moment(item.created_at).format('MMMM Do YYYY, HH:mm:ss (UTC)'),
+                    'Start Date': moment(item.start_date).utc().format('MMMM Do, YYYY'),
+                    'Last Sync': moment(item.last_synced).utc().format('MMMM Do, YYYY - HH:mm:ss (UTC)'),
+                    'Created': moment(item.created_at).utc().format('MMMM Do, YYYY - HH:mm:ss (UTC)'),
                 };
             } else {
                 this.selectedItemId = null;
@@ -226,9 +226,11 @@ export default {
                     iconAlt: 'Aiia icon',
                     created_at: source.created_at,
                     last_synced: source.last_synced,
+                    start_date: source.start_date,
                     active: source.active,
                     destination_type: source.destination_type,
                     destination_name: source.destination_name,
+                    destination_account: source.destination_account,
                 })
             } else if(source.type === 1) {
                 this.sourceItems.push({
@@ -242,9 +244,11 @@ export default {
                     iconAlt: 'Tink icon',
                     created_at: source.created_at,
                     last_synced: source.last_synced,
+                    start_date: source.start_date,
                     active: source.active,
                     destination_type: source.destination_type,
                     destination_name: source.destination_name,
+                    destination_account: source.destination_account,
                 })
             }
 

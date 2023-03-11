@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory()->create([
             'name' => 'Matias',
             'email' => 'ryggtonning@gmail.com',
-            'uuid' => '4ca97930-914d-448d-91cc-d479baaff6bd',
+            'uuid' => Str::uuid(),
             'password' => Hash::make('#Frikk2314'),
         ]);
 

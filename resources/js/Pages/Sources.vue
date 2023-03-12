@@ -7,7 +7,7 @@ import StackedCards from "../Comps/StackedCards.vue";
 import ActionModal from "../Comps/ActionModal.vue";
 import SelectMenu from "../Comps/SelectMenu.vue";
 import {BuildingLibraryIcon} from "@heroicons/vue/24/outline";
-import ListCardWithActionBudgets from "../Comps/ListCardWithAction.vue";
+import ListCardWithAction from "../Comps/ListCardWithAction.vue";
 
 const providers = [
     { id: 0,title: 'Bank Account', subtitle: 'Connect a bank account', customIcon: true, icon: BuildingLibraryIcon, extra: 'https://www.tink.com/' },
@@ -273,11 +273,13 @@ export default {
         <div class="py-5">
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg">
-                    <ListCardWithActionBudgets
+                    <ListCardWithAction
                         title="Connected Sources"
                         action="Add Source"
                         @action-clicked="(item) => tableActionClicked(item)"
                         @action-button-clicked="(item) => tableActionButtonClicked(item)"
+                        empty-title="No sources connected"
+                        empty-subtitle="Get started by adding a source to your Synci.io account."
                         :items="sourceItems"
                     />
                 </div>

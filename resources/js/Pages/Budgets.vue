@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
-import ListCardWithActionBudgets from "../Comps/ListCardWithAction.vue";
+import ListCardWithAction from "../Comps/ListCardWithAction.vue";
 import Slider from "../Comps/Slider.vue";
 import DescriptionList from "../Comps/DescriptionList.vue";
 import StackedCards from "../Comps/StackedCards.vue";
@@ -165,10 +165,12 @@ export default {
         <div class="py-5">
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg">
-                    <ListCardWithActionBudgets
+                    <ListCardWithAction
                         title="Connected Accounts"
                         action="Add Budget"
                         :items="budgetItems"
+                        empty-title="No budgets connected"
+                        empty-subtitle="Get started by adding a budgeting app to your Synci.io account."
                         @action-clicked="(item) => tableActionClicked(item)"
                     />
                 </div>

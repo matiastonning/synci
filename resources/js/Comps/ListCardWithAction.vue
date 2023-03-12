@@ -8,6 +8,10 @@ defineProps({
     title: String,
     action: String,
     items: Array,
+    emptyTitle: String,
+    emptySubtitle: String,
+    emptyAction: String,
+    emptyActionHref: String,
 });
 
 </script>
@@ -91,7 +95,7 @@ export default {
                 </a>
             </li>
             <div v-if="items.length === 0" class="my-20">
-                <EmptyState title="No budgets connected" subtitle="Get started by adding a budgeting app to your Synci.io account." action="Add Budget" />
+                <EmptyState :title="emptyTitle" :subtitle="emptySubtitle" :action="emptyAction" :action-href="emptyActionHref" />
             </div>
         </ul>
     </div>

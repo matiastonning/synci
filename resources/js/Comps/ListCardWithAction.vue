@@ -30,7 +30,7 @@ export default {
 </script>
 
 <template>
-  <div class="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-5 sm:px-6">
+  <div class="border-b border-gray-200 border-opacity-70 dark:border-gray-700 dark:border-opacity-70 px-4 py-5 sm:px-6">
     <div class="-ml-4 -mt-2 flex flex-wrap items-center justify-between sm:flex-nowrap">
       <div class="ml-4 mt-2">
         <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">{{ title }}</h3>
@@ -40,8 +40,8 @@ export default {
       </div>
     </div>
   </div>
-    <div class="overflow-hidden bg-white dark:bg-gray-800 shadow">
-        <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+    <div class="overflow-hidden shadow">
+        <ul role="list" class="divide-y divide-gray-200 divide-opacity-80 dark:divide-gray-700 dark:divide-opacity-70">
             <li v-for="item in items" :key="item.id">
                 <a @click="this.$emit('actionClicked', item)" class="block hover:bg-gray-50 dark:hover:bg-opacity-[2.5%] cursor-pointer">
                     <div class="flex items-center px-4 py-4 sm:px-6">
@@ -49,12 +49,12 @@ export default {
                             <div class="flex-shrink-0">
                                 <span v-if="item.icon" v-html="item.icon"></span>
                                 <div v-else>
-                                    <BuildingLibraryIcon v-if="item.title==='Bank Account'" class="h-12 w-12 bg-orange-100 p-2.5 dark:bg-orange-600 dark:bg-opacity-40 text-orange-400 dark:text-orange-300 rounded-full object-cover" aria-hidden="true" />
+                                    <BuildingLibraryIcon v-if="item.title==='Bank Account'" class="h-12 w-12 bg-orange-100 p-2.5 dark:bg-orange-600 dark:bg-opacity-25 text-orange-400 dark:text-orange-300 rounded-full object-cover" aria-hidden="true" />
                                 </div>
                             </div>
                             <div class="min-w-0 flex-1 px-4 md:grid md:grid-cols-2 md:gap-4">
                                 <div>
-                                    <p class="truncate text-sm font-medium text-teal-600 dark:text-teal-500"><span v-html="item.title"></span></p>
+                                    <p class="truncate text-sm font-medium text-teal-600 dark:text-teal-400"><span v-html="item.title"></span></p>
                                     <p class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
                                         <component :is="item.subIcon" class="mr-1.5 h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                                         <span class="truncate"><span v-html="item.subtitle"></span></span>

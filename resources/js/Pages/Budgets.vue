@@ -164,7 +164,7 @@ export default {
 
         <div class="py-5">
             <div class="max-w-7xl mx-auto">
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg">
+                <div class="bg-white dark:bg-gray-800 dark:bg-opacity-80 overflow-hidden shadow-xl rounded-lg">
                     <ListCardWithAction
                         title="Connected Accounts"
                         action="Add Budget"

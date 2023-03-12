@@ -33,7 +33,7 @@ export default {
                         <thead>
                         <tr>
                             <th v-for="(val, index) in titles" scope="col"
-                                class="sticky top-0 z-10 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 bg-opacity-75 dark:bg-opacity-60 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white backdrop-blur backdrop-filter"
+                                class="sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 bg-opacity-40 dark:bg-opacity-40 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white backdrop-blur backdrop-filter"
                                 :class="[{
                                     'lg:pl-8 pl-4 pr-3 rounded-tl-lg': index === 0, // first item
                                     'px-3': index !== 0, // other items
@@ -41,7 +41,7 @@ export default {
                                 {{ val.name }}
                             </th>
 
-                            <th scope="col" class="sticky rounded-tr-lg top-0 z-10 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-700 bg-opacity-75 dark:bg-opacity-60 py-3.5 pr-4 pl-3 backdrop-blur backdrop-filter sm:pr-6 lg:pr-8">
+                            <th scope="col" class="sticky rounded-tr-lg top-0 z-10 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 bg-opacity-40 dark:bg-opacity-40 py-3.5 pr-4 pl-3 backdrop-blur backdrop-filter sm:pr-6 lg:pr-8">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
@@ -52,7 +52,7 @@ export default {
                                     :class="[{
                                         'lg:pl-8 pl-4 pr-3 font-medium text-gray-900': itemIndex === 0, // first item
                                         'px-3': itemIndex !== row.items.length - 1 && itemIndex !== 0, // middle items
-                                        'border-b border-gray-200 dark:border-gray-700 dark:border-opacity-80': rowIndex !== rows.length - 1, // not last item
+                                        'border-b border-gray-200 dark:border-gray-700 dark:border-opacity-70': rowIndex !== rows.length - 1, // not last item
                                     }, item.class]">
                                     <span v-html="item.value"></span>
                                 </td>

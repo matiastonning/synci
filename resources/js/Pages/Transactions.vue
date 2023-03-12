@@ -183,7 +183,7 @@ export default {
 
         <div class="md:py-5 py-4">
             <div class="max-w-7xl mx-auto">
-                <div class="bg-white dark:bg-gray-800 shadow-xl rounded-lg">
+                <div class="bg-white dark:bg-gray-800 dark:bg-opacity-80 shadow-xl rounded-lg">
                     <TableStickyHeader @action-clicked="tableActionClicked" :rows="transactionItems" :titles="transactionTitles" :pagination-links="transactions" />
                 </div>
             </div>

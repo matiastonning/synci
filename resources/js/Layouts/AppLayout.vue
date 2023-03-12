@@ -118,15 +118,15 @@ export default {
         <TransitionRoot as="template" :show="sidebarOpen">
             <Dialog as="div" class="relative z-40 md:hidden" @close="sidebarOpen = false">
                 <TransitionChild as="template" enter="transition-opacity ease-linear duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="transition-opacity ease-linear duration-300" leave-from="opacity-100" leave-to="opacity-0">
-                    <div class="fixed inset-0 bg-gray-600 bg-opacity-75" />
+                    <div class="fixed inset-0 bg-gray-500 dark:bg-black bg-opacity-30 dark:bg-opacity-40 transition-opacity" />
                 </TransitionChild>
 
                 <div class="fixed inset-0 z-40 flex">
                     <TransitionChild as="template" enter="transition ease-in-out duration-300 transform" enter-from="-translate-x-full" enter-to="translate-x-0" leave="transition ease-in-out duration-300 transform" leave-from="translate-x-0" leave-to="-translate-x-full">
-                        <DialogPanel class="relative flex w-full max-w-xs flex-1 flex-col bg-teal-800">
+                        <DialogPanel class="relative flex w-full max-w-xs flex-1 flex-col bg-teal-800 dark:bg-gray-800">
                             <TransitionChild as="template" enter="ease-in-out duration-300" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-300" leave-from="opacity-100" leave-to="opacity-0">
                                 <div class="absolute top-0 right-0 -mr-12 pt-2">
-                                    <button type="button" class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" @click="sidebarOpen = false">
+                                    <button type="button" class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none" @click="sidebarOpen = false">
                                         <span class="sr-only">Close sidebar</span>
                                         <XMarkIcon class="h-6 w-6 text-white" aria-hidden="true" />
                                     </button>
@@ -137,7 +137,7 @@ export default {
                                     <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=teal&shade=500" alt="Your Company" />
                                 </div>
                                 <nav class="mt-5 space-y-1 px-2">
-                                    <Link v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-white bg-opacity-10' : 'opacity-60 hover:bg-black hover:bg-opacity-10', 'group text-white flex items-center px-2 py-3 text-base font-medium rounded-md']">
+                                    <Link v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-white bg-opacity-10 dark:bg-opacity-60 dark:bg-gray-700' : 'opacity-60 hover:bg-black hover:bg-opacity-10 dark:hover:bg-opacity-20', 'group text-white flex items-center px-2 py-3 text-base font-medium rounded-md']">
                                         <component :is="item.icon" class="text-white mr-4 flex-shrink-0 h-6 w-6" aria-hidden="true" />
                                         {{ item.name }}
                                     </Link>
@@ -156,7 +156,7 @@ export default {
                                     </div>
                                 </MenuButton>
                                 <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                                    <MenuItems class="absolute bottom-2 right-0 left-0 z-10 mx-2 mt-1 origin-bottom divide-y divide-white divide-opacity-10 rounded-md bg-teal-600 bg-opacity-60 backdrop-blur shadow focus:outline-none">
+                                    <MenuItems class="absolute bottom-2 right-0 left-0 z-10 mx-2 mt-1 origin-bottom divide-y divide-white divide-opacity-10 rounded-md dark:bg-gray-700 dark:bg-opacity-80 bg-teal-600 bg-opacity-60 backdrop-blur shadow focus:outline-none">
                                         <div class="py-1 mx-1">
                                             <MenuItem v-slot="{ active }">
                                                 <Link :href="route('profile.show')" :class="[active ? 'bg-white bg-opacity-10 rounded' : '', 'text-white text-opacity-90 block px-4 py-3 text-base font-medium']">Account settings</Link>
@@ -180,15 +180,15 @@ export default {
         </TransitionRoot>
 
         <!-- Static sidebar for desktop -->
-        <div class="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
+        <div class="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col md:border-r dark:md:border-gray-700 dark:md:border-opacity-75">
             <!-- Sidebar component, swap this element with another sidebar if you like -->
-            <div class="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-teal-800">
+            <div class="flex min-h-0 flex-1 flex-col bg-teal-800 dark:bg-gray-800">
                 <div class="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
                     <div class="flex flex-shrink-0 items-center px-4">
                         <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/mark.svg?color=teal&shade=500" alt="Your Company" />
                     </div>
-                    <nav class="mt-5 flex-1 space-y-1 bg-teal-800 px-2">
-                        <Link v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-white bg-opacity-10' : 'opacity-60 hover:bg-black hover:bg-opacity-10', 'group text-white flex items-center px-2 py-2.5 text-sm font-medium rounded-md']">
+                    <nav class="mt-5 flex-1 space-y-1 bg-teal-800 dark:bg-gray-800 px-2">
+                        <Link v-for="item in navigation" :key="item.name" :href="item.href" :class="[item.current ? 'bg-white bg-opacity-10 dark:bg-opacity-60 dark:bg-gray-700' : 'opacity-60 hover:bg-black hover:bg-opacity-10 dark:hover:bg-opacity-20', 'group text-white flex items-center px-2 py-2.5 text-sm font-medium rounded-md']">
                             <component :is="item.icon" class="text-white mr-4 flex-shrink-0 h-6 w-6" aria-hidden="true" />
                             {{ item.name }}
                         </Link>
@@ -207,7 +207,7 @@ export default {
                         </div>
                     </MenuButton>
                     <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-                        <MenuItems class="absolute bottom-2 right-0 left-0 z-10 mx-2 mt-1 origin-bottom divide-y divide-white divide-opacity-10 rounded-md bg-teal-600 bg-opacity-60 backdrop-blur shadow focus:outline-none">
+                        <MenuItems class="absolute bottom-2 right-0 left-0 z-10 mx-2 mt-1 origin-bottom divide-y divide-white divide-opacity-10 rounded-md bg-teal-600 dark:bg-gray-700 dark:bg-opacity-80 bg-opacity-60 backdrop-blur shadow focus:outline-none">
                             <div class="py-1 mx-1">
                                 <MenuItem v-slot="{ active }">
                                     <Link :href="route('profile.show')" :class="[active ? 'bg-white bg-opacity-10 rounded' : '', 'text-white text-opacity-90 block px-4 py-2.5 text-sm font-medium']">Account settings</Link>
@@ -227,11 +227,11 @@ export default {
             <main class="flex-1">
                 <div class="py-6">
                     <div class="mx-auto max-w-7xl px-4 sm:px-8 md:px-12 lg:px-20 flex flex-row">
-                        <button type="button" class="md:hidden -ml-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500" @click="sidebarOpen = true">
+                        <button type="button" class="md:hidden -ml-0.5 inline-flex h-12 w-12 items-center justify-center rounded-md text-gray-500 hover:text-gray-900 dark:hover:text-gray-300 focus:outline-none" @click="sidebarOpen = true">
                             <span class="sr-only">Open sidebar</span>
                             <Bars3Icon class="h-6 w-6" aria-hidden="true" />
                         </button>
-                        <h1 class="text-2xl mt-2 ml-2 mr-6 md:ml-0 font-semibold text-gray-900">
+                        <h1 class="text-2xl mt-2 ml-2 mr-6 md:ml-0 font-semibold text-gray-900 dark:text-gray-100">
                             {{ title }}
                         </h1>
 
@@ -241,10 +241,10 @@ export default {
                                 <label for="search" class="sr-only">Search</label>
                                 <div class="relative text-gray-400 text-opacity-75">
                                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                        <MagnifyingGlassIcon class="h-5 w-5" aria-hidden="true" />
+                                        <MagnifyingGlassIcon class="h-4 w-4" aria-hidden="true" />
                                     </div>
-                                    <input ref="search_input" name="search_input" @keyup="searchInput" @keyup.enter="searchEnter" :value="searchValue" id="search" class="block text-sm float-left peer w-full sm:w-[55%] sm:border-opacity-100 bg-opacity-70 rounded-md sm:rounded-r-none border border-transparent focus:border-gray-300 focus:border-r-gray-200 focus:shadow-sm bg-gray-200 py-2 pl-10 pr-3 sm:border-r-[1px] sm:focus:border-r-[0.25px] leading-5 focus:bg-white text-gray-500 focus:text-gray-900 sm:focus:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm placeholder-gray-400" placeholder="Search..." type="search" />
-                                    <select v-model="sourceValue" @change="sourceInput" ref="source_select" name="source_select" class="bg-gray-200 bg-opacity-70 w-[45%] border border-transparent leading-5 hidden sm:block peer-focus:border-gray-300 peer-focus:border-l-gray-200 peer-focus:bg-white peer-focus:outline-none peer-focus:ring-0 peer-focus:shadow-sm py-2 pr-9 relative rounded-none rounded-r-md sm:border-l-[0.25px] sm:border-opacity-100 sm:border-l-[0.5px] sm:text-sm text-gray-500 text-right focus:border-transparent focus:outline-none focus:ring-0 focus:z-10">
+                                    <input ref="search_input" name="search_input" @keyup="searchInput" @keyup.enter="searchEnter" :value="searchValue" id="search" class="block text-sm float-left peer w-full sm:w-[60%] dark:focus:bg-opacity-70 dark:focus:border-opacity-70 border-r-transparent sm:border-opacity-100 dark:sm:border-opacity-60 bg-opacity-70 rounded-md sm:rounded-r-none border border-transparent dark:border-gray-700 dark:border-r-transparent focus:border-gray-300 dark:focus:border-gray-600 focus:border-r-gray-200 focus:shadow-sm bg-gray-200 dark:bg-gray-800 py-2 pl-10 pr-3 sm:border-r-[1px] sm:focus:border-r-[0.5px] leading-5 focus:bg-white dark:focus:bg-gray-700 text-gray-500 focus:text-gray-900 dark:text-gray-400 dark:focus:text-gray-100 dark:focus:text-gray-100 sm:focus:placeholder-gray-500 dark:sm:focus:placeholder-gray-400 focus:outline-none focus:ring-0 sm:text-sm placeholder-gray-400 dark:placeholder-gray-500" placeholder="Search..." type="search" />
+                                    <select v-model="sourceValue" @change="sourceInput" ref="source_select" name="source_select" class="bg-gray-200 dark:bg-gray-800 bg-opacity-70 w-[40%] border-l-transparent dark:border-l-transparent border dark:peer-focus:bg-opacity-70 dark:peer-focus:border-opacity-70 border-transparent dark:border-gray-700 leading-5 hidden sm:block peer-focus:border-gray-300 peer-focus:border-l-gray-200 peer-focus:bg-white dark:peer-focus:border-gray-600 dark:peer-focus:border-l-gray-600 dark:peer-focus:bg-gray-700 peer-focus:outline-none peer-focus:ring-0 peer-focus:shadow-sm py-2 pr-9 relative rounded-none rounded-r-md sm:border-l-[0.5px] sm:border-opacity-100 dark:sm:border-opacity-60 sm:border-l-[0.5px] sm:text-sm text-gray-500 dark:text-gray-400 text-right focus:border-transparent dark:focus:border-gray-700 dark:focus:border-opacity-60 focus:outline-none focus:ring-0 focus:z-10">
                                         <option :value="null">All Sources</option>
                                         <option v-for="selectItem in searchSelectItems" :value="selectItem.name">{{ selectItem.name }}</option>
                                     </select>

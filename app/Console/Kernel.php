@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('transactions:refresh')->hourly();
+        $schedule->command('transactions:transfer')->everyThirtyMinutes();
     }
 
     /**

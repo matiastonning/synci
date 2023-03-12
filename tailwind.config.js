@@ -22,6 +22,7 @@ module.exports = {
             colors: {
                 "vtd-primary": colors.teal, // Light mode Datepicker color
                 "vtd-secondary": colors.gray, // Dark mode Datepicker color
+                "gray-850": colors.gray, // Dark mode Datepicker color
             },
         },
     },

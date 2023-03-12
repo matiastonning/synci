@@ -409,7 +409,7 @@ class TinkController extends Controller
                 $transferLog->source_id = $source->id;
                 $transferLog->transaction_id = $transaction->id;
                 $transferLog->status_code = TransferStatus::PENDING();
-                $transferLog->status_message = 'Transaction fetched from source "' . $source->name . ' (' . $source->identifier . ')".';
+                $transferLog->status_message = 'Transaction fetched from activated source "' . $source->name . ' (' . $source->identifier . ')".';
                 $transferLog->save();
             }
         }

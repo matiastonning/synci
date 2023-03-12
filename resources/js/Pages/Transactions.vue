@@ -71,27 +71,27 @@ export default {
                 'Amount': amount,
                 'Booking Date': date,
                 'Source': sourceName + ' (' + sourceIdentifier + ')',
-                'Status': status,
-                'ID': '<span class="text-xs text-gray-500">'+ id + '</span>',
+                'Status': '<span class="-ml-4">'+ status + '</span>',
+                'ID': '<span class="text-xs text-gray-500 dark:text-gray-400">'+ id + '</span>',
             };
 
             this.selectedItemLogs = [];
             transactionLogs.forEach(transactionLog => {
-                let iconBackground = 'bg-gray-200';
-                let iconColor = 'text-gray-600';
+                let iconBackground = 'bg-gray-200 dark:bg-gray-700';
+                let iconColor = 'text-gray-600 dark:text-gray-400';
                 let icon = ArrowsRightLeftIcon;
 
                 if(transactionLog.status_code === this.transferLogStatuses['SUCCESS']) {
-                    iconBackground = 'bg-teal-200';
-                    iconColor = 'text-teal-700';
+                    iconBackground = 'bg-teal-200 dark:bg-teal-800';
+                    iconColor = 'text-teal-700 dark:text-teal-300';
                     icon = CheckIcon;
                 } else if(transactionLog.status_code === this.transferLogStatuses['WARNING']) {
-                    iconBackground = 'bg-orange-200';
-                    iconColor = 'text-orange-700';
+                    iconBackground = 'bg-orange-200 dark:bg-orange-600 dark:bg-opacity-40';
+                    iconColor = 'text-orange-700 dark:text-orange-300';
                     icon = ExclamationTriangleIcon;
                 } else if(transactionLog.status_code === this.transferLogStatuses['ERROR']) {
-                    iconBackground = 'bg-red-200';
-                    iconColor = 'text-red-700';
+                    iconBackground = 'bg-red-200 dark:bg-red-600 dark:bg-opacity-40';
+                    iconColor = 'text-red-700 dark:text-red-300';
                     icon = ExclamationCircleIcon;
                 }
 
@@ -99,7 +99,7 @@ export default {
                     'iconBackground': iconBackground,
                     'iconColor': iconColor,
                     'icon': icon,
-                    'content': transactionLog.status_message.replace(/"([^"]+)"/g, '<span class="font-semibold text-gray-600">$1</span>'),
+                    'content': transactionLog.status_message.replace(/"([^"]+)"/g, '<span class="font-semibold text-gray-600 dark:text-gray-200">$1</span>'),
                     'date': moment(transactionLog.created_at).utc().format('MMM D, HH:mm'),
                 });
             });
@@ -121,19 +121,19 @@ export default {
                 transactionClass = 'bg-black bg-opacity-5 text-gray-800';
             } else if(transaction.status === this.transactionStatuses['TRANSFERRED']) {
                 transactionStatus = 'Transferred';
-                transactionClass = 'bg-teal-100 text-teal-800';
+                transactionClass = 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200';
             } else if(transaction.status === this.transactionStatuses['TRANSFERRING']) {
                 transactionStatus = 'Transferring';
-                transactionClass = 'bg-indigo-100 text-indigo-800';
+                transactionClass = 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200';
             } else if(transaction.status === this.transactionStatuses['FAILED_SOME']) {
                 transactionStatus = 'Failed';
-                transactionClass = 'bg-red-100 text-red-800';
+                transactionClass = 'bg-red-100 text-red-800 dark:bg-red-600 dark:text-red-200 dark:bg-opacity-40';
             } else if(transaction.status === this.transactionStatuses['FAILED_ALL']) {
                 transactionStatus = 'Failed';
-                transactionClass = 'bg-red-100 text-red-800';
+                transactionClass = 'bg-red-100 text-red-800 dark:bg-red-600 dark:text-red-200 dark:bg-opacity-40';
             } else if(transaction.status === this.transactionStatuses['FAILED_DUPLICATE']) {
                 transactionStatus = 'Duplicate';
-                transactionClass = 'bg-orange-100 text-orange-800';
+                transactionClass = 'bg-orange-100 text-orange-800 dark:bg-orange-600 dark:text-orange-200 dark:bg-opacity-30';
             }
 
             this.transactionItems.push({
@@ -156,9 +156,9 @@ export default {
                         class: 'hidden xl:table-cell',
                     },
                     {
-                        value: '<span class="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium ' + transactionClass + '">'
+                        value: '<span class="pl-3"><span class="inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium ' + transactionClass + '">'
                             + transactionStatus
-                            + '</span>',
+                            + '</span></span>',
                         class: 'hidden lg:table-cell',
                     },
                 ],
@@ -189,15 +189,15 @@ export default {
             </div>
         </div>
         <Slider :title="selectedItemTitle" subtitle="Transaction details"
-                :action-button="{ text: 'Retry', class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2' }"
+                :action-button="{ text: 'Retry', class: 'hover:bg-teal-700 bg-teal-600' }"
                 :open="sliderOpen" :selected-id="selectedItem.ID"
                 @close-slider="sliderClosed" @action-clicked="(e) => sliderActionClicked(e)">
 
             <DescriptionList :selected-item="selectedItem" />
 
-            <hr/>
+            <hr class="dark:opacity-20"/>
 
-            <h2 class="font-medium">Logs</h2>
+            <h2 class="font-medium dark:text-gray-300">Logs</h2>
             <SimpleFeed :events="selectedItemLogs" />
 
         </Slider>

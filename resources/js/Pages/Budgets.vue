@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
-import ListCardWithActionBudgets from "../Comps/ListCardWithActionBudgets.vue";
+import ListCardWithActionBudgets from "../Comps/ListCardWithAction.vue";
 import Slider from "../Comps/Slider.vue";
 import DescriptionList from "../Comps/DescriptionList.vue";
 import StackedCards from "../Comps/StackedCards.vue";
@@ -10,6 +10,8 @@ import DeleteModal from "../Comps/DeleteModal.vue";
 <script>
 import moment from "moment";
 import {router} from "@inertiajs/vue3";
+import { WalletIcon } from '@heroicons/vue/24/outline'
+
 
 export default {
     props: {
@@ -105,8 +107,8 @@ export default {
                 this.selectedItemId = item.id;
                 this.selectedItem = {
                     'Budget app': item.type,
-                    'Budget name': item.name,
-                    'Budget Account': item.account_name,
+                    'Budget name': item.title,
+                    'Budget Account': item.subtitle,
                     'Status': item.active ? 'Connected' : 'Disconnected',
                     'Created': moment(item.created_at).utc().format('MMMM Do, YYYY - HH:mm:ss (UTC)'),
                 };
@@ -134,12 +136,13 @@ export default {
                 this.budgetItems.push({
                     id: budget.id,
                     type: 'YNAB',
-                    name: budget.name,
-                    account_name: budget.account_name,
+                    title: budget.name,
+                    subtitle: budget.account_name,
+                    extended_title: 'Created <time :datetime="item.created_at">' + moment(budget.created_at).utc().fromNow() + '</time>',
                     identifier: budget.identifier,
                     account_identifier: budget.account_identifier,
-                    icon: '../assets/icons/ynab.png',
-                    iconAlt: 'YNAB icon',
+                    subIcon: WalletIcon,
+                    icon: '<img class="h-12 w-12 rounded-full object-scale-down bg-gray-100 dark:bg-gray-900" src="' + "../assets/icons/ynab.png" + '" :alt="YNAB" />',
                     created_at: budget.created_at,
                     active: budget.active,
                 })
@@ -176,15 +179,15 @@ export default {
                 :subtitle="selectedItemId ? 'Manage budget connection.' : 'Add a new budgeting app to your Synci.io account.'"
                 :action-button="selectedItemId ? {
                     text: 'Delete Budget',
-                    class: 'hover:bg-red-700 bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+                    class: 'hover:bg-red-700 bg-red-600'
                 } : {
                     text: 'Add Budget',
-                    class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2'
+                    class: 'hover:bg-teal-700 bg-teal-600'
                 }"
-                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60' : 'bg-teal-800 bg-opacity-70 text-white'"
-                :title-class="selectedItemId ? 'text-gray-900' : 'text-white'"
-                :subtitle-class="selectedItemId ? 'text-gray-500' : 'text-white opacity-70'"
-                :x-button-class="selectedItemId ? 'text-gray-400 hover:text-gray-500' : 'text-white hover:text-gray-100'"
+                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60 dark:bg-gray-700 dark:bg-opacity-40' : 'bg-teal-800 bg-opacity-70 dark:bg-teal-700 dark:bg-opacity-50 text-white'"
+                :title-class="selectedItemId ? 'text-gray-900 dark:text-gray-100' : 'text-white'"
+                :subtitle-class="selectedItemId ? 'text-gray-500 dark:text-gray-400' : 'text-white opacity-70'"
+                :x-button-class="selectedItemId ? 'text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-600' : 'text-white hover:text-gray-100'"
                 :open="sliderOpen" :selected-id="selectedItemId"
                 @close-slider="sliderClosed" @action-clicked="(e) => sliderActionClicked(e)">
 

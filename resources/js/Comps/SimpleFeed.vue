@@ -15,7 +15,7 @@ export default {
         <ul role="list" class="-mb-8">
             <li v-for="(event, eventIdx) in events">
                 <div class="relative pb-8">
-                    <span v-if="eventIdx !== events.length - 1" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
+                    <span v-if="eventIdx !== events.length - 1" class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200 dark:bg-gray-700" aria-hidden="true" />
                     <div class="relative flex space-x-3">
                         <div>
               <span :class="[event.iconBackground, 'h-8 w-8 rounded-full flex items-center justify-center']">
@@ -24,11 +24,11 @@ export default {
                         </div>
                         <div class="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                             <div>
-                                <p class="text-sm text-gray-500">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">
                                     <span v-html="event.content"></span>
                                 </p>
                             </div>
-                            <div class="whitespace-nowrap text-right text-xs text-gray-400">
+                            <div class="whitespace-nowrap text-right text-xs dark:text-gray-500 text-gray-400">
                                 <time :datetime="event.datetime">{{ event.date }}</time>
                             </div>
                         </div>

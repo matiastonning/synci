@@ -1,6 +1,5 @@
 <script setup>
 import AppLayout from '../Layouts/AppLayout.vue';
-import ListCardWithActionSources from "../Comps/ListCardWithActionSources.vue";
 import Slider from "../Comps/Slider.vue";
 import DeleteModal from "../Comps/DeleteModal.vue";
 import DescriptionList from "../Comps/DescriptionList.vue";
@@ -8,6 +7,7 @@ import StackedCards from "../Comps/StackedCards.vue";
 import ActionModal from "../Comps/ActionModal.vue";
 import SelectMenu from "../Comps/SelectMenu.vue";
 import {BuildingLibraryIcon} from "@heroicons/vue/24/outline";
+import ListCardWithActionBudgets from "../Comps/ListCardWithAction.vue";
 
 const providers = [
     { id: 0,title: 'Bank Account', subtitle: 'Connect a bank account', customIcon: true, icon: BuildingLibraryIcon, extra: 'https://www.tink.com/' },
@@ -18,6 +18,7 @@ const providers = [
 <script>
 import moment from "moment/moment";
 import {router} from "@inertiajs/vue3";
+import { BuildingLibraryIcon, CircleStackIcon } from '@heroicons/vue/24/outline'
 
 export default {
     props: {
@@ -217,13 +218,14 @@ export default {
             if(source.type === 0) {
                 this.sourceItems.push({
                     id: source.id,
-                    type: 'Bank Account',
+                    title: 'Bank Account',
                     integrator: 'Aiia',
-                    displayName: source.name + ' (' + source.identifier + ')',
+                    subtitle: source.name + ' (' + source.identifier + ')',
+                    type: 'source',
                     name: source.name,
                     account: source.identifier,
-                    icon: '../assets/icons/curve.png',
                     iconAlt: 'Aiia icon',
+                    extended_title: 'Synced <time :datetime="item.created_at">' + moment(source.last_synced).utc().fromNow() + '</time>',
                     created_at: source.created_at,
                     last_synced: source.last_synced,
                     start_date: source.start_date,
@@ -235,13 +237,15 @@ export default {
             } else if(source.type === 1) {
                 this.sourceItems.push({
                     id: source.id,
-                    type: 'Bank Account',
+                    title: 'Bank Account',
                     integrator: 'Tink',
-                    displayName: source.name + ' (' + source.identifier + ')',
+                    subtitle: source.name + ' (' + source.identifier + ')',
                     name: source.name,
                     account: source.identifier,
-                    icon: '../assets/icons/tink.png',
                     iconAlt: 'Tink icon',
+                    subIcon: CircleStackIcon,
+                    type: 'source',
+                    extended_title: 'Synced <time :datetime="item.created_at">' + moment(source.last_synced).utc().fromNow() + '</time>',
                     created_at: source.created_at,
                     last_synced: source.last_synced,
                     start_date: source.start_date,
@@ -269,7 +273,7 @@ export default {
         <div class="py-5">
             <div class="max-w-7xl mx-auto">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl rounded-lg">
-                    <ListCardWithActionSources
+                    <ListCardWithActionBudgets
                         title="Connected Sources"
                         action="Add Source"
                         @action-clicked="(item) => tableActionClicked(item)"
@@ -284,15 +288,15 @@ export default {
                 :subtitle="selectedItemId ? 'Manage source connection.' : 'Connect the sources you want to integrate with Synci to get started. We have partnered with Tink to simplify this process for bank accounts.'"
                 :action-button="selectedItemId ? {
                     text: 'Delete Source',
-                    class: 'hover:bg-red-700 bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2'
+                    class: 'hover:bg-red-700 bg-red-600'
                 } : {
                     text: 'Add Source',
-                    class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2'
+                    class: 'hover:bg-teal-700 bg-teal-600'
                 }"
-                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60' : 'bg-teal-800 bg-opacity-70 text-white'"
-                :title-class="selectedItemId ? 'text-gray-900' : 'text-white'"
-                :subtitle-class="selectedItemId ? 'text-gray-500' : 'text-white opacity-70'"
-                :x-button-class="selectedItemId ? 'text-gray-400 hover:text-gray-500' : 'text-white hover:text-gray-100'"
+                :header-class="selectedItemId ? 'bg-gray-200 bg-opacity-60 dark:bg-gray-700 dark:bg-opacity-40' : 'bg-teal-800 bg-opacity-70 dark:bg-teal-700 dark:bg-opacity-50 text-white'"
+                :title-class="selectedItemId ? 'text-gray-900 dark:text-gray-100' : 'text-white'"
+                :subtitle-class="selectedItemId ? 'text-gray-500 dark:text-gray-400' : 'text-white opacity-70'"
+                :x-button-class="selectedItemId ? 'text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-600' : 'text-white hover:text-gray-100'"
                 :open="sliderOpen" :selected-id="selectedItemId"
                 @close-slider="sliderClosed" @action-clicked="(e) => sliderActionClicked(e)">
 
@@ -303,7 +307,7 @@ export default {
                              @deactivate-source="(sourceId) => alterSource(sourceId)" />
             <div v-else>
                 <SelectMenu @selected-changed="(selectedCountry) => country = selectedCountry" :items="$page['props']['countries']" label="Country" class="mb-6" />
-                <hr class="mb-6" />
+                <hr class="mb-6 dark:opacity-20" />
                 <StackedCards :items="providers" @stacked-card-selected="" />
             </div>
         </Slider>

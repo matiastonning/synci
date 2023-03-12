@@ -31,23 +31,23 @@ export default {
         },
         headerClass: {
             type: String,
-            default: 'bg-gray-200 bg-opacity-60'
+            default: 'bg-gray-200 bg-opacity-60 dark:bg-gray-700 dark:bg-opacity-40'
         },
         titleClass: {
             type: String,
-            default: 'text-gray-900'
+            default: 'text-gray-900 dark:text-gray-100'
         },
         subtitleClass: {
             type: String,
-            default: 'text-gray-500'
+            default: 'text-gray-500 dark:text-gray-400'
         },
         xButtonClass: {
             type: String,
-            default: 'text-gray-400 hover:text-gray-500'
+            default: 'text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-600'
         },
         actionButton: {
             default: {
-                class: 'hover:bg-teal-700 bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2',
+                class: 'hover:bg-teal-700 bg-teal-600',
                 text: 'Connect',
             },
             type: Object,
@@ -76,7 +76,7 @@ export default {
     <Dialog as="div" class="relative z-10" @close="this.$emit('closeSlider')">
 
         <TransitionChild as="template" enter="ease-in-out duration-500" enter-from="opacity-0" enter-to="opacity-100" leave="ease-in-out duration-500" leave-from="opacity-100" leave-to="opacity-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-30 transition-opacity" />
+            <div class="fixed inset-0 bg-gray-500 dark:bg-black bg-opacity-30 dark:bg-opacity-40 transition-opacity" />
         </TransitionChild>
         <div class="fixed inset-0" />
 
@@ -85,7 +85,7 @@ export default {
           <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
             <TransitionChild as="template" enter="transform transition ease-in-out duration-500 sm:duration-700" enter-from="translate-x-full" enter-to="translate-x-0" leave="transform transition ease-in-out duration-500 sm:duration-700" leave-from="translate-x-0" leave-to="translate-x-full">
               <DialogPanel class="pointer-events-auto w-screen max-w-md my-5">
-                <form class="rounded-l-lg flex h-full flex-col divide-y divide-gray-200 bg-opacity-80 bg-white backdrop-blur shadow-xl">
+                <form class="rounded-l-lg flex h-full flex-col divide-y divide-gray-200 dark:divide-gray-700 bg-opacity-80 dark:bg-opacity-80 bg-white dark:bg-gray-800 backdrop-blur shadow-xl">
                   <div class="h-0 flex-1 overflow-y-auto">
                     <div :class="headerClass" class="rounded-tl-lg backdrop-blur py-6 px-4 sm:px-6">
                       <div class="flex items-center justify-between">
@@ -111,8 +111,8 @@ export default {
                     </div>
                   </div>
                   <div class="flex flex-shrink-0 justify-end px-4 py-4">
-                      <button type="button" class="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2" @click="this.$emit('closeSlider')">Close</button>
-                      <button :class="actionButton.class" @click="actionClicked(selectedId)" type="button" class="ml-4 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm">
+                      <button type="button" class="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-0 focus:outline-none dark:border-transparent dark:bg-gray-500 dark:bg-opacity-[25%] dark:text-white dark:hover:bg-opacity-[12%]" @click="this.$emit('closeSlider')">Close</button>
+                      <button :class="actionButton.class" @click="actionClicked(selectedId)" type="button" class="ml-4 inline-flex justify-center rounded-md border border-transparent focus:ring-0 focus:outline-none py-2 px-4 text-sm font-medium text-white shadow-sm">
                           {{ actionButton.text }}
                       </button>
                   </div>
